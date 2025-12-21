@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions
+from rest_framework.response import Response
 from .models import Order
 from .serializers import OrderSerializer, CreateOrderSerializer
 
@@ -14,6 +15,14 @@ class OrderListCreateView(generics.ListCreateAPIView):
         if self.request.method == 'POST':
             return CreateOrderSerializer
         return OrderSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        order = serializer.save()
+        # Return the full order representation
+        out = OrderSerializer(order, context={'request': request})
+        return Response(out.data, status=201)
 
 
 class OrderDetailView(generics.RetrieveAPIView):
