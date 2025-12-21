@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -158,6 +159,10 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',  # Vite dev server
 ]
 CORS_ALLOW_CREDENTIALS = True
+
+# Stripe settings (use env vars in production)
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
 
 # Custom user model
 AUTH_USER_MODEL = 'users.User'

@@ -95,9 +95,20 @@ Notes & choix techniques
 
 Prochaines améliorations possibles
 --------------------------------
-- Ajouter l'intégration d'un fournisseur de paiement (Stripe) pour les commandes.
+- Ajouter l'intégration d'un fournisseur de paiement (Stripe) pour les commandes (implémentation de base fournie).
 - Ajouter des endpoints d'administration pour gérer les stocks, promotions, etc.
 - Ajouter bots de tests e2e (Cypress / Playwright) et pipelines CI.
+
+Stripe (intégration fournie)
+----------------------------
+- Variables d'environnement à définir :
+  - `STRIPE_SECRET_KEY` (clé secrète côté serveur)
+  - `STRIPE_WEBHOOK_SECRET` (secret du webhook Stripe)
+- Endpoints exposés :
+  - POST `/api/payments/create-intent/` (auth requis) — body: `{ "order_id": <order_id> }` → renvoie `client_secret` pour la confirmation côté client
+  - POST `/api/payments/webhook/` — endpoint public pour recevoir les webhooks Stripe (sécurisé par la signature `STRIPE_WEBHOOK_SECRET`)
+
+Notes: le backend utilise la librairie officielle `stripe` et crée un objet `Payment` lié à une `Order` pour tracer le paiement.
 
 Contact
 -------
