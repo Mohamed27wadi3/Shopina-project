@@ -1,0 +1,54 @@
+python -m pip install --upgrade pip
+python -m pip install graphvizdigraph Shopina_Use_Case {
+	bgcolor=white fontsize=20 label="Shopina - Diagramme de Cas d'Utilisation" labelloc=t rankdir=LR
+	node [fontname=Helvetica fontsize=12 shape=ellipse]
+	Visiteur [label=Visiteur fillcolor="#FFE0B2" shape=box style="rounded,filled"]
+	Client [label=Client fillcolor="#FFCC80" shape=box style="rounded,filled"]
+	Marchand [label=Marchand fillcolor="#FFD54F" shape=box style="rounded,filled"]
+	Admin [label=Administrateur fillcolor="#FFF59D" shape=box style="rounded,filled"]
+	Paiement [label="Système de Paiement" fillcolor="#E1BEE7" shape=box style="rounded,filled"]
+	Notif [label="Système de Notifications" fillcolor="#BBDEFB" shape=box style="rounded,filled"]
+	UC1 [label="Parcourir les boutiques"]
+	UC2 [label="Rechercher des produits"]
+	UC3 [label="Voir une fiche produit"]
+	UC4 [label="Créer un compte"]
+	UC5 [label="Se connecter"]
+	UC6 [label="Ajouter au panier"]
+	UC7 [label="Passer une commande"]
+	UC8 [label="Suivre une commande"]
+	UC9 [label="Laisser un avis"]
+	UC10 [label="Créer une boutique"]
+	UC11 [label="Personnaliser la boutique"]
+	UC12 [label="Gérer les produits"]
+	UC13 [label="Gérer les stocks"]
+	UC14 [label="Gérer les commandes"]
+	UC15 [label="Configurer les paiements"]
+	UC16 [label="Consulter les statistiques"]
+	UC17 [label="Gérer les utilisateurs"]
+	UC18 [label="Modérer les boutiques/produits"]
+	UC19 [label="Consulter les rapports"]
+	UC20 [label="Configurer les commissions"]
+	Visiteur -> UC1
+	Visiteur -> UC2
+	Visiteur -> UC3
+	Client -> UC4
+	Client -> UC5
+	Client -> UC6
+	Client -> UC7
+	Client -> UC8
+	Client -> UC9
+	Marchand -> UC10
+	Marchand -> UC11
+	Marchand -> UC12
+	Marchand -> UC13
+	Marchand -> UC14
+	Marchand -> UC15
+	Marchand -> UC16
+	Admin -> UC17
+	Admin -> UC18
+	Admin -> UC19
+	Admin -> UC20
+	UC7 -> Paiement [label=inclut]
+	UC7 -> Notif [label="notification commande"]
+	UC14 -> Notif [label="maj commande"]
+}

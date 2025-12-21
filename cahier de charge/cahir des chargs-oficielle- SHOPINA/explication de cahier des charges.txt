@@ -1,0 +1,209 @@
+🧾 Cahier des charges – Projet Shopina
+1. Présentation générale
+
+Le projet Shopina est une plateforme e-commerce moderne qui permet aux utilisateurs de créer, gérer et personnaliser leurs propres boutiques en ligne.
+Elle combine simplicité, performance et élégance, tout en intégrant des outils avancés comme la gestion des stocks, le suivi des commandes, et la connexion avec les réseaux sociaux.
+
+🟦 Explication :
+Cette partie sert d’introduction. Elle résume le but du projet, son identité, et ce qu’il propose. C’est ce que l’on lit en premier pour comprendre la vision du produit.
+
+2. Période d’exécution
+
+Les services commenceront le 1er novembre 2025 et se poursuivront jusqu’au 31 janvier 2026, pour une durée totale de trois (3) mois.
+
+🟦 Explication :
+Cette partie précise la durée du projet (début et fin). C’est essentiel pour le suivi du calendrier et pour planifier les paiements ou les livrables.
+
+3. Étendue des travaux
+
+L’entrepreneur s’engage à réaliser :
+
+La conception et le design du site (UI/UX).
+
+Le développement backend avec Django.
+
+Le développement frontend avec HTML, CSS et JavaScript.
+
+Les tests, la documentation et le déploiement final.
+
+🟦 Explication :
+Cette section décrit tout ce que le prestataire va faire. Elle définit le contenu concret du travail et les responsabilités techniques.
+
+4. Matériaux livrables
+
+Maquettes du design du site.
+
+Code source complet du frontend et backend.
+
+Documentation technique et guide d’utilisation.
+
+Version finale hébergée et testée de la plateforme Shopina.
+
+🟦 Explication :
+On y liste tout ce que le client va recevoir à la fin du projet. Ce sont les « produits livrables ».
+
+5. Responsabilités
+Du prestataire (entrepreneur) :
+
+Développer et livrer le projet selon le cahier des charges.
+
+Respecter les délais et la qualité demandée.
+
+Assurer le support technique pendant la phase de test.
+
+Du client :
+
+Fournir les informations nécessaires au projet (besoins, accès, validations).
+
+Suivre les livrables et valider les étapes.
+
+Effectuer les paiements selon l’échéancier.
+
+🟦 Explication :
+Cette partie clarifie ce que chaque partie doit faire. Elle évite les malentendus et fixe les obligations de chacun.
+
+6. Grille tarifaire et coût total
+
+Cet engagement est établi sur une base forfaitaire de 348 000 DZD pour trois mois, répartis ainsi :
+
+Description	Nombre de ressources	Taux journalier (DZD)	Nombre de jours	Total
+Conception et Design	1	2 900	20	58 000
+Développement Backend (Django)	1	7 250	20	145 000
+Développement Frontend (HTML/CSS/JS)	1	4 350	20	87 000
+Tests et déploiement	1	2 900	20	58 000
+Total général				348 000 DZD
+
+🟦 Explication :
+C’est la partie financière. On y trouve le budget global, la répartition par tâche, et parfois les modalités de paiement.
+
+7. Modalités de paiement
+
+Le paiement sera effectué en trois tranches mensuelles selon l’avancement du projet.
+Toute modification majeure du périmètre fera l’objet d’un Project Change Request (PCR) signé par les deux parties avant application.
+
+🟦 Explication :
+On indique comment et quand le paiement sera fait, et comment gérer les changements imprévus du projet.
+
+8. Débours et facturation
+
+Le client sera facturé mensuellement pour les services rendus.
+Les factures doivent être payées à réception.
+Des pénalités de 5 % par mois s’appliqueront en cas de retard de paiement supérieur à 30 jours.
+
+🟦 Explication :
+Cette section fixe les règles de facturation et les pénalités en cas de retard. Elle protège les droits du prestataire.
+
+9. Critères de réalisation
+
+Le projet est considéré comme terminé lorsque :
+
+Toutes les fonctionnalités sont livrées et validées par le client.
+
+Aucun défaut majeur n’est constaté dans les 2 jours suivant la livraison.
+
+🟦 Explication :
+C’est la condition de fin de projet. Elle détermine quand le travail est officiellement accepté.
+
+10. Contrôle des modifications (PCR)
+
+Toute modification importante fera l’objet d’un formulaire de changement (PCR) qui précisera :
+
+La raison du changement.
+
+Son impact sur le budget et le calendrier.
+
+La validation des deux parties avant exécution.
+
+🟦 Explication :
+Cette section définit la procédure à suivre si le client veut modifier le projet (ajout de fonctionnalités, prolongation, etc.).
+
+11. Informations administratives
+Élément	Détail
+Adresse de facturation	Université Saad Dahlab, Blida 1, Pavillon 176
+Chef de projet client	Mohamed Wadia Gharib
+Centre de coûts client	#SHOPINA2025
+
+🟦 Explication :
+On y place les coordonnées administratives et financières pour la facturation et la gestion du contrat.
+
+12. Signatures finales
+Partie	Nom	Titre	Signature
+Client	Université Saad Dahlab	Responsable du projet	⬜
+Entrepreneur	Mohamed Wadia Gharib	Développeur / Prestataire	⬜
+
+🟦 Explication :
+Cette section formalise l’accord. Les deux parties signent pour valider le cahier des charges et lancer le projet.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+أولاً : واش كاين فهاد الوثيقة (التفسير بالعربية)
+
+الوثيقة اللي جمّعناها هي "cahier des charges" يعني دفتر الشروط التقنية والإدارية لمشروعك Shopina، واللي فيها جميع المعلومات اللازمة باش يكون المشروع رسمي ومنظم.
+ها وش تمثّل كل فقرة باختصار بالعربية :
+
+Présentation générale (العرض العام)
+فيها وصف عام للمشروع: الاسم، الهدف، والفكرة العامة (منصة تجارة إلكترونية جزائرية).
+➤ الهدف منها هو تقديم المشروع بطريقة مختصرة ومفهومة.
+
+Période d’exécution (مدة الإنجاز)
+فيها تاريخ البداية والنهاية (3 أشهر مثلاً).
+➤ هذا مهم باش يتحدد وقت العمل بدقة.
+
+Étendue des travaux (نطاق العمل)
+تشرح المهام اللي راح يديرها المطوّر (تصميم، تطوير Backend بـDjango، واجهة Frontend بـHTML/CSS/JS…).
+➤ تبين شنو المطلوب منك بالضبط.
+
+Matériaux livrables (المخرجات أو النتائج)
+مثل الكود النهائي، التصميمات، الوثائق التقنية، النسخة النهائية للموقع.
+➤ هذا يوضح شنو راح تسلّم في النهاية.
+
+Responsabilités (المسؤوليات)
+تحدد واجباتك كمطوّر وواجبات العميل (الجامعة أو الجهة الطالبة).
+➤ لتفادي أي سوء فهم.
+
+Grille tarifaire (الميزانية وجدول التكاليف)
+تبيّن السعر الإجمالي، كيفاش توزعت التكلفة بين المراحل، وعدد الأيام.
+➤ هذا يعطي نظرة مالية احترافية.
+
+Modalités de paiement (طريقة الدفع)
+تشرح كيف يتم الدفع (على 3 دفعات مثلاً).
+➤ ضروري لأي عقد أو اتفاق.
+
+Débours et facturation (الفوترة والمصاريف)
+تتكلم على كيفاش تصدر الفواتير والمصاريف الإضافية.
+➤ توضح الجانب الإداري.
+
+Critères de réalisation (معايير الإنجاز)
+تحدد وقت نقولو المشروع تمّ بنجاح (بعد تسليم كل الخصائص دون مشاكل).
+➤ يسهّل غلق المشروع رسمياً.
+
+Contrôle des modifications (تغيير المشروع)
+واش يصرا إذا حبيتو تبدلو شي في المشروع (PCR).
+➤ هذا يخلي الأمور منظمة لو صار تعديل في الخطة.
+
+Informations administratives (المعلومات الإدارية)
+فيها العنوان، اسمك، ورمز المشروع.
+➤ معلومات ضرورية للفواتير والاتصال.
+
+Signatures (التوقيعات)
+توقيع الطرفين (أنت كمطوّر والجامعة كعميل).
+➤ تأكيد رسمي للاتفاق.
+
+🔹 ثانياً : واش هذا كافي لمشروعك ؟
+
+✅ نعم، 100٪ كافي ومناسب جداً لمشروعك الأكاديمي أو حتى الاحترافي.
+الوثيقة منظمة، مفهومة، وتحترم الهيكل الرسمي لأي cahier des charges professionnel.
+هي تعطي صورة جدّ محترفة عنك كمطوّر، خاصة لأنك حددت كل التفاصيل (مدة، سعر، مهام، تسليم، توقيع...).

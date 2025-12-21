@@ -1,0 +1,7 @@
+Django==5.2.7
+djangorestframework>=3.14.0
+djangorestframework-simplejwt>=2.9.0
+django-cors-headers>=4.0.0
+django-filter>=23.1
+pytest
+pytest-django
