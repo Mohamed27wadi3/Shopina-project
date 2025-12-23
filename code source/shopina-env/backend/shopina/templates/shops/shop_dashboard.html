@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} - Shopina</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecf1 100%);
+            font-family: -apple-system, 'Segoe UI', 'Roboto', sans-serif;
+            color: #0A1A2F;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .navbar-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 24px;
+        }
+
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #0077FF 0%, #5AC8FA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0077FF 0%, #5AC8FA 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 119, 255, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 119, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #0A1A2F;
+            border: 1.5px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            border-color: #0077FF;
+            background: #f8f9fa;
+        }
+
+        .profile-header { 
+            position: relative; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
+
+        .profile-trigger { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            padding: 8px 12px; 
+            border-radius: 12px; 
+            border: 1.5px solid transparent; 
+            background: transparent; 
+            cursor: pointer; 
+            transition: all 200ms ease; 
+        }
+
+        .profile-trigger:hover { 
+            border-color: #e0e0e0; 
+            background: #f3f7ff; 
+        }
+
+        .profile-avatar { 
+            width: 38px; 
+            height: 38px; 
+            border-radius: 50%; 
+            background: linear-gradient(135deg, #0077FF, #5AC8FA); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 800; 
+            color: #fff; 
+            font-size: 15px;
+            box-shadow: 0 2px 8px rgba(0, 119, 255, 0.2);
+        }
+
+        .profile-avatar img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            border-radius: 50%; 
+        }
+
+        .profile-info { 
+            line-height: 1.3; 
+            font-size: 13px; 
+            text-align: left; 
+        }
+
+        .profile-name { 
+            font-weight: 700; 
+            color: #0A1A2F; 
+            margin: 0; 
+        }
+
+        .profile-role { 
+            font-size: 11px; 
+            color: #0077FF; 
+            font-weight: 600;
+        }
+
+        .profile-chevron { 
+            font-size: 12px; 
+            color: #8a9ab3; 
+            transition: transform 200ms ease;
+        }
+
+        .profile-trigger[aria-expanded="true"] .profile-chevron {
+            transform: scaleY(-1);
+        }
+
+        .profile-menu { 
+            position: absolute; 
+            right: 0; 
+            top: calc(100% + 8px); 
+            min-width: 240px; 
+            background: white; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 32px rgba(10, 26, 47, 0.15); 
+            padding: 8px; 
+            display: none; 
+            flex-direction: column; 
+            gap: 4px; 
+            z-index: 50; 
+        }
+
+        .profile-menu.open { 
+            display: flex; 
+            animation: slideDown 200ms cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+
+        .profile-menu a { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            padding: 11px 14px; 
+            border-radius: 10px; 
+            color: #0A1A2F; 
+            text-decoration: none; 
+            font-weight: 500; 
+            transition: all 180ms ease; 
+            font-size: 13px;
+        }
+
+        .profile-menu a:hover, 
+        .profile-menu a:focus-visible { 
+            background: #f3f7ff; 
+            color: #0077FF;
+            outline: none; 
+        }
+
+        .profile-menu .danger { 
+            color: #d62f2f; 
+        }
+
+        .profile-menu .danger:hover { 
+            background: rgba(214, 47, 47, 0.08); 
+            color: #d62f2f;
+        }
+
+        @keyframes slideDown { 
+            from { 
+                opacity: 0; 
+                transform: translateY(-8px); 
+            } 
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            } 
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 0;
+            margin-bottom: 32px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .breadcrumb a {
+            color: #0077FF;
+            text-decoration: none;
+            transition: all 200ms ease;
+            font-weight: 500;
+        }
+
+        .breadcrumb a:hover {
+            color: #5AC8FA;
+        }
+
+        .breadcrumb-separator {
+            color: #999;
+        }
+
+        .breadcrumb-current {
+            color: #0A1A2F;
+            font-weight: 600;
+        }
+
+        .header-section {
+            margin-bottom: 40px;
+        }
+
+        .header-title {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #0A1A2F;
+            letter-spacing: -0.5px;
+        }
+
+        .header-subtitle {
+            color: #666;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #f0f0f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #0077FF, #5AC8FA);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 24px rgba(0, 119, 255, 0.15);
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #0077FF;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-unit {
+            color: #999;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+            border: 1px solid #f0f0f0;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 28px;
+            color: #0A1A2F;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .info-value {
+            color: #0A1A2F;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons .btn {
+            flex: 1;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 200ms ease;
+        }
+
+        .badge-success {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+            color: #2e7d32;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .badge-warning {
+            background: linear-gradient(135deg, #fff3e0 0%, #fff8f4 100%);
+            color: #e65100;
+            border: 1px solid rgba(230, 81, 0, 0.2);
+        }
+
+        p {
+            line-height: 1.7;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 32px 16px;
+            }
+
+            .header-title {
+                font-size: 28px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .stat-card {
+                padding: 20px;
+            }
+
+            .stat-value {
+                font-size: 28px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .navbar-actions {
+                gap: 8px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-buttons .btn {
+                width: 100%;
+            }
+
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+    </style>
+    </head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="navbar-content">
+            <a href="/" class="navbar-brand">Shopina</a>
+            <div class="navbar-actions">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <a href="{% url 'home' %}" class="btn btn-secondary" style="background: rgba(0,119,255,0.1); border:1px solid rgba(0,119,255,0.3);">Accueil</a>
+                    <a href="/dashboard/" class="btn btn-primary">📊 Dashboard</a>
+                </div>
+                <a href="/shop/settings/" class="btn btn-secondary">⚙️ Paramètres</a>
+                <div class="profile-header" data-profile-menu>
+                    <button class="profile-trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+                        <span class="profile-avatar">
+                            {% if request.user.is_authenticated and request.user.avatar %}
+                                <img src="{{ request.user.avatar.url }}" alt="Avatar" />
+                            {% else %}
+                                {% if request.user.is_authenticated %}
+                                    {{ request.user.username|first|upper }}
+                                {% else %}
+                                    G
+                                {% endif %}
+                            {% endif %}
+                        </span>
+                        <span class="profile-info">
+                            {% if request.user.is_authenticated %}
+                                <span class="profile-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+                                <span class="profile-role">{% if request.user.is_staff %}Admin{% elif request.user.is_superuser %}Propriétaire{% else %}Utilisateur{% endif %}</span>
+                            {% else %}
+                                <span class="profile-name">Invité</span>
+                                <span class="profile-role">Public</span>
+                            {% endif %}
+                        </span>
+                        <span class="profile-chevron" aria-hidden="true">▾</span>
+                    </button>
+                    <div class="profile-menu" role="menu">
+                        <a href="{% url 'profile_dynamic' %}" role="menuitem">👤 Profil</a>
+                        <a href="/accounts/password_change/" role="menuitem">⚙️ Paramètres</a>
+                        <a href="{% url 'home' %}" role="menuitem">👀 Vue visiteur</a>
+                        <a href="{% url 'orders-page' %}" role="menuitem">📦 Commandes</a>
+                        <a href="/accounts/logout/" role="menuitem" class="danger">🚪 Déconnexion</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb" aria-label="Fil d'Ariane">
+            <a href="/dashboard/">📊 Tableau de bord</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">🏪 {{ shop.name }}</span>
+        </nav>
+
+        <!-- Header Section -->
+        <div class="header-section">
+            <h1 class="header-title">{{ shop.name }}</h1>
+            <p class="header-subtitle">Gérez votre boutique, vos produits et vos ventes</p>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div style="background: linear-gradient(135deg, {% if message.tags == 'success' %}#e8f5e9 0%, #f1f8f4{% else %}#ffebee 0%, #fff5f5{% endif %}); border-left: 4px solid {% if message.tags == 'success' %}#4caf50{% else %}#d32f2f{% endif %}; padding: 16px; border-radius: 12px; margin-bottom: 24px; color: {% if message.tags == 'success' %}#2e7d32{% else %}#c62828{% endif %}; font-weight: 500;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">📦 Produits</div>
+                <div class="stat-value">{{ shop.total_products }}</div>
+                <div class="stat-unit">Produits actifs</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">📋 Commandes</div>
+                <div class="stat-value">{{ shop.total_orders }}</div>
+                <div class="stat-unit">Commandes reçues</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">💰 Ventes</div>
+                <div class="stat-value">{{ shop.total_sales|floatformat:0 }} DZD</div>
+                <div class="stat-unit">Revenu total</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">⭐ Évaluation</div>
+                <div class="stat-value">{{ shop.average_rating|floatformat:1 }}/5</div>
+                <div class="stat-unit">Note moyenne</div>
+            </div>
+        </div>
+
+        <!-- Shop Information Section -->
+        <div class="section">
+            <h2 class="section-title">📋 Informations de la boutique</h2>
+            
+            <div class="info-row">
+                <span class="info-label">Nom</span>
+                <span class="info-value">{{ shop.name }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Slug (URL)</span>
+                <span class="info-value" style="font-family: monospace; color: #0077FF;">/shop/{{ shop.slug }}/</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Statut</span>
+                <span class="info-value">
+                    {% if shop.is_active %}
+                        <span class="badge badge-success">✓ Actif</span>
+                    {% else %}
+                        <span class="badge badge-warning">⚠ Inactif</span>
+                    {% endif %}
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Vérification</span>
+                <span class="info-value">
+                    {% if shop.is_verified %}
+                        <span class="badge badge-success">✓ Vérifié</span>
+                    {% else %}
+                        <span class="badge badge-warning">⏳ En attente</span>
+                    {% endif %}
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Email</span>
+                <span class="info-value">{{ shop.email|default:"Non défini" }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Téléphone</span>
+                <span class="info-value">{{ shop.phone|default:"Non défini" }}</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Créée le</span>
+                <span class="info-value">{{ shop.created_at|date:"d/m/Y à H:i" }}</span>
+            </div>
+
+            <div class="action-buttons">
+                <a href="/shop/settings/" class="btn btn-primary">✏️ Modifier les paramètres</a>
+                <a href="/templates/" class="btn btn-secondary">🎨 Choisir un template</a>
+                <a href="/dashboard/" class="btn btn-secondary">← Retour</a>
+            </div>
+        </div>
+
+        <!-- Description Section (if filled) -->
+        {% if shop.description %}
+            <div class="section">
+                <h2 class="section-title">📝 À propos de votre boutique</h2>
+                <p>
+                    {{ shop.description|linebreaks }}
+                </p>
+            </div>
+        {% endif %}
+
+        <!-- Quick Actions -->
+        <div class="section">
+            <h2 class="section-title">🚀 Actions rapides</h2>
+            <div class="action-buttons">
+                <a href="/api/docs/" class="btn btn-secondary">📚 Documentation API</a>
+                <a href="/templates/" class="btn btn-secondary">🎭 Templates</a>
+                <a href="{% url 'orders-page' %}" class="btn btn-secondary">📦 Mes commandes</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const containers = document.querySelectorAll('[data-profile-menu]');
+            containers.forEach(container => {
+                const trigger = container.querySelector('.profile-trigger');
+                const menu = container.querySelector('.profile-menu');
+                if (!trigger || !menu) return;
+                const items = Array.from(menu.querySelectorAll('[role="menuitem"]'));
+                const close = () => { menu.classList.remove('open'); trigger.setAttribute('aria-expanded','false'); };
+                const open = () => { menu.classList.add('open'); trigger.setAttribute('aria-expanded','true'); };
+                const toggle = () => menu.classList.contains('open') ? close() : open();
+                trigger.addEventListener('click', (e) => { e.stopPropagation(); toggle(); if (menu.classList.contains('open') && items.length) items[0].focus(); });
+                trigger.addEventListener('keydown', (e) => { if (['Enter',' ','ArrowDown'].includes(e.key)) { e.preventDefault(); open(); if (items.length) items[0].focus(); } });
+                menu.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') { close(); trigger.focus(); }
+                    if (['ArrowDown','ArrowUp'].includes(e.key)) { e.preventDefault(); const current = items.indexOf(document.activeElement); const dir = e.key === 'ArrowDown' ? 1 : -1; const next = (current + dir + items.length) % items.length; items[next]?.focus(); }
+                });
+                document.addEventListener('click', (e) => { if (!container.contains(e.target)) close(); });
+            });
+        })();
+    </script>
+</body>
+</html>
