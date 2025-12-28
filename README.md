@@ -59,6 +59,21 @@ Une plateforme de commerce électronique moderne et complète construite avec **
 - **Git**
 
 ### 1. Cloner le Repo (avec submodules)
+### 1bis. Setup en une commande (Windows)
+
+Vous pouvez lancer l'installation complète (backend + frontend) et démarrer les serveurs automatiquement via:
+
+```bash
+./quick_setup.bat
+```
+
+Ce script:
+- Initialise les submodules
+- Crée et prépare un venv Python (`.venv`) dans `code source/shopina-env/backend`
+- Installe les dépendances backend et applique les migrations
+- Installe les dépendances frontend
+- Lance deux fenêtres PowerShell: `manage.py runserver` et `npm run dev`
+
 
 Pour récupérer automatiquement le frontend (submodule), utilisez:
 
