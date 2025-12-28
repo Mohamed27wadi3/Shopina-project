@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Checkout · Shopina</title>
+  <meta name="description" content="Finalisez votre achat en toute sécurité sur Shopina." />
+  <style>
+    body{margin:0;font-family:Inter,system-ui;background:#0f172a;color:#e5e7eb}
+    header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid #23324a}
+    main{display:grid;grid-template-columns:1fr 360px;gap:16px;padding:16px}
+    .panel{border:1px solid #23324a;background:#15213a;border-radius:12px;padding:14px}
+    .items{display:flex;flex-direction:column;gap:10px}
+    .item{display:flex;justify-content:space-between;align-items:center;border:1px solid #23324a;border-radius:10px;padding:10px;background:#0b132b}
+    .summary{position:sticky;top:12px}
+    .btn{padding:10px 12px;border:none;border-radius:10px;font-weight:800;cursor:pointer}
+    .btn.primary{background:linear-gradient(135deg,#3b82f6,#06b6d4);color:#062a2f}
+    .btn.secondary{background:#0b132b;color:#93c5fd;border:1px solid #334155}
+    .status{margin-top:8px;color:#9ca3af}
+    @media (max-width:900px){ main{grid-template-columns:1fr} .summary{position:static} }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Checkout</strong>
+    <nav>
+      <a href="/">Accueil</a>
+      <a href="/dashboard">Dashboard</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>Panier</h2>
+      <div id="items" class="items" aria-live="polite"></div>
+    </section>
+    <aside class="panel summary" aria-label="Résumé">
+      <h2>Résumé</h2>
+      <p>Sous-total: <strong id="subtotal">0 DZD</strong></p>
+      <p>Frais: <strong id="fees">0 DZD</strong></p>
+      <p>Total: <strong id="total">0 DZD</strong></p>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button id="validate" class="btn secondary">Valider le panier</button>
+        <button id="pay" class="btn primary">Payer</button>
+      </div>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <button id="invoice" class="btn secondary" style="margin-top:8px;">Télécharger facture</button>
+    </aside>
+  </main>
+
+  {% include 'partials/cookie_banner.html' %}
+
+  <script>
+    const fmt = new Intl.NumberFormat('fr-DZ', { style:'currency', currency:'DZD' });
+    const itemsEl = document.getElementById('items');
+    const subtotalEl = document.getElementById('subtotal');
+    const feesEl = document.getElementById('fees');
+    const totalEl = document.getElementById('total');
+    const statusEl = document.getElementById('status');
+    let cart = null;
+
+    async function loadCart(){
+      const res = await fetch('/api/carts/', { headers: auth() });
+      cart = await res.json();
+      renderCart(); calc();
+    }
+
+    function renderCart(){
+      itemsEl.innerHTML = '';
+      (cart.items||[]).forEach(ci => {
+        const el = document.createElement('div'); el.className='item';
+        el.innerHTML = `<span>${ci.product_name} × ${ci.quantity}</span><strong>${fmt.format(ci.total_price||0)}</strong>`;
+        itemsEl.appendChild(el);
+      });
+    }
+
+    function calc(){
+      const sub = (cart.items||[]).reduce((s,i)=> s + (i.total_price||0), 0);
+      const fees = Math.round(sub * 0.01);
+      const tot = sub + fees;
+      subtotalEl.textContent = fmt.format(sub);
+      feesEl.textContent = fmt.format(fees);
+      totalEl.textContent = fmt.format(tot);
+    }
+
+    async function validate(){
+      statusEl.textContent = 'Validation en cours…';
+      const res = await fetch('/api/carts/validate/', { headers: auth() });
+      statusEl.textContent = res.ok ? 'Panier valide.' : 'Validation échouée.';
+    }
+
+    async function pay(){
+      statusEl.textContent = 'Paiement en cours…';
+      const res = await fetch('/api/orders/', { method:'POST', headers: { ...auth(), 'Content-Type':'application/json' }, body: '{}' });
+      if(res.ok){ statusEl.textContent = 'Commande créée.'; }
+      else { statusEl.textContent = 'Paiement échoué.'; }
+    }
+
+    function invoice(){
+      const w = window.open('', '_blank');
+      const rows = (cart.items||[]).map(i => `<tr><td>${i.product_name}</td><td>${i.quantity}</td><td>${fmt.format(i.total_price||0)}</td></tr>`).join('');
+      w.document.write(`<!doctype html><html><head><meta charset='utf-8'><title>Facture</title><style>
+        body{font-family:Inter,system-ui;padding:20px}
+        table{width:100%;border-collapse:collapse}
+        th,td{border:1px solid #e5e7eb;padding:8px;text-align:left}
+        h1{margin:0 0 8px}
+        @media print { button{display:none} }
+      </style></head><body><h1>Facture Shopina</h1><p>Date: ${new Date().toLocaleDateString('fr-FR')}</p>
+      <table><thead><tr><th>Produit</th><th>Qté</th><th>Prix</th></tr></thead><tbody>${rows}</tbody></table>
+      <p style='margin-top:8px;'>Total: <strong>${totalEl.textContent}</strong></p>
+      <button onclick='window.print()'>Imprimer</button></body></html>`);
+      w.document.close();
+    }
+
+    function auth(){
+      const token = localStorage.getItem('shopina.token');
+      return token ? { 'Authorization': 'Bearer '+token } : {};
+    }
+
+    document.getElementById('validate').addEventListener('click', validate);
+    document.getElementById('pay').addEventListener('click', pay);
+    document.getElementById('invoice').addEventListener('click', invoice);
+    window.addEventListener('load', loadCart);
+  </script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Commandes | Shopina</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+      .topbar { background: var(--panel); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+      .topbar-title { font-size: 16px; font-weight: 700; margin: 0; }
+      .profile-section { position: relative; display: flex; align-items: center; gap: 12px; padding-left: 12px; border-left: 1px solid var(--border); }
+      .profile-trigger { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:12px; background:transparent; border:1px solid transparent; cursor:pointer; color: var(--text); transition: all 200ms ease; }
+      .profile-trigger:hover { border-color: var(--border); background: rgba(59,130,246,0.08); }
+      .profile-trigger:focus-visible { outline:2px solid rgba(59,130,246,0.45); outline-offset:3px; }
+      .profile-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #0ea5e9); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size:14px; }
+      .profile-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+      .profile-info { line-height: 1.2; }
+      .profile-name { font-size: 13px; font-weight: 700; margin: 0; }
+      .profile-role { font-size: 11px; color: #93c5fd; font-weight: 600; margin: 2px 0 0; }
+      .profile-chevron { font-size:12px; color:#94a3b8; }
+      .profile-menu { position:absolute; right:0; top:calc(100% + 8px); min-width: 220px; background:#0f172a; border:1px solid var(--border); border-radius:12px; box-shadow:0 20px 48px rgba(0,0,0,0.26); padding:8px; display:none; flex-direction:column; gap:4px; z-index:40; }
+      .profile-menu.open { display:flex; animation: fadeDown 160ms ease; }
+      .profile-menu a { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; color:var(--text); text-decoration:none; font-weight:600; transition:all 180ms ease; }
+      .profile-menu a:hover, .profile-menu a:focus-visible { background: rgba(59,130,246,0.14); color:#bfdbfe; outline:none; }
+      .profile-menu .danger { color:#fca5a5; }
+      .profile-menu .danger:hover, .profile-menu .danger:focus-visible { background: rgba(248,113,113,0.15); }
+    :root {
+      --bg: #0b1220;
+      --panel: #0f172a;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --border: rgba(148,163,184,0.16);
+      --accent: #3b82f6;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .layout { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+    .sidebar { background: #0f172a; border-right: 1px solid var(--border); padding: 18px 14px; display: flex; flex-direction: column; }
+    .sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .sidebar-logo { margin: 0; font-weight: 800; color: #3b82f6; font-size: 16px; }
+    .home-button { background: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%); border: none; color: #fff; width: 38px; height: 38px; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; transition: all 300ms ease; text-decoration: none; flex-shrink: 0; }
+    .home-button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+    .home-button:active { transform: translateY(0); }
+    .sidebar-menu { padding: 16px 12px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+    .sidebar-menu-item { display: flex; flex-direction: column; gap: 8px; }
+    .sidebar-menu-button { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 10px; background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: var(--text); text-decoration: none; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 300ms ease; }
+    .sidebar-menu-button:hover { background: rgba(59,130,246,0.25); border-color: rgba(59,130,246,0.6); transform: translateX(4px); }
+    .sidebar-menu-button:active { transform: translateX(2px); }
+    .sidebar-menu-button.home { background: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%); border-color: #3b82f6; color: #fff; }
+    .sidebar-menu-button.home:hover { transform: translateX(4px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+    .sidebar-menu-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; padding: 0 14px 8px; margin-top: 8px; }
+    .breadcrumb { display:flex; align-items:center; gap:8px; padding:12px 24px; background:rgba(59,130,246,0.08); border-bottom:1px solid var(--border); font-size:13px; color:var(--muted); }
+    .breadcrumb a { color:#3b82f6; text-decoration:none; transition:all 200ms ease; }
+    .breadcrumb a:hover { color:#0ea5e9; text-decoration:underline; }
+    .breadcrumb-separator { color:var(--muted-light); margin:0 4px; }
+    .breadcrumb-current { color:var(--text); font-weight:600; }
+    .nav-title { margin: 0 0 12px; font-weight: 800; letter-spacing: -0.02em; }
+    .nav { display: flex; flex-direction: column; gap: 10px; }
+    .nav a { display: block; padding: 12px 14px; border-radius: 12px; color: var(--text); text-decoration: none; background: rgba(148,163,184,0.08); border: 1px solid var(--border); transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease; }
+    .nav a:hover { transform: translateX(4px); border-color: rgba(59,130,246,0.5); box-shadow: 0 10px 30px rgba(59,130,246,0.2); }
+    .nav a.active { border-color: rgba(59,130,246,0.8); background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(34,211,238,0.12)); }
+
+    main { padding: 24px; }
+    h1 { margin: 0 0 10px; font-size: 26px; letter-spacing: -0.02em; }
+    .muted { color: var(--muted); margin: 0 0 18px; }
+    .table-wrap { background: #0f172a; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; color: var(--text); }
+    th, td { padding: 12px 14px; text-align: left; font-size: 14px; }
+    thead { background: rgba(148,163,184,0.08); }
+    tbody tr { border-top: 1px solid var(--border); }
+    tbody tr:hover { background: rgba(59,130,246,0.06); }
+    .chip { display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .chip.completed { background: rgba(16,185,129,0.18); color: #34d399; }
+    .chip.processing { background: rgba(59,130,246,0.2); color: #bfdbfe; }
+    .chip.pending { background: rgba(245,158,11,0.2); color: #fcd34d; }
+    .chip.cancelled { background: rgba(239,68,68,0.18); color: #f87171; }
+    .pagination { display: flex; gap: 8px; padding: 14px; align-items: center; justify-content: flex-end; background: #0f172a; border-top: 1px solid var(--border); }
+    .pagination a, .pagination span { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); color: var(--text); text-decoration: none; font-weight: 600; }
+    .pagination a:hover { border-color: rgba(59,130,246,0.5); }
+    .pagination .current { background: rgba(59,130,246,0.16); border-color: rgba(59,130,246,0.6); }
+    @keyframes fadeDown { from { opacity:0; transform: translateY(-4px); } to { opacity:1; transform: translateY(0); } }
+
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .sidebar { display: none; } main { padding: 16px; } table { font-size: 13px; } }
+    @media (prefers-reduced-motion: reduce) { .nav a, .pagination a { transition: none; transform: none !important; box-shadow: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2 class="sidebar-logo">Shopina</h2>
+      </div>
+      
+      <!-- MAIN MENU -->
+      <div class="sidebar-menu">
+        <div class="sidebar-menu-item">
+          <a href="{% url 'home' %}" class="sidebar-menu-button" title="Page d'accueil publique">
+            <span>Accueil public</span>
+          </a>
+          <a href="/dashboard/" class="sidebar-menu-button home" title="Tableau de bord">
+            <span>📊</span>
+            <span>Dashboard</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="sidebar-menu-label">Pages</div>
+      <nav class="nav" aria-label="Navigation principale">
+        <a href="/dashboard/">Dashboard</a>
+        <a href="/orders/" class="active">Commandes</a>
+      </nav>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <h3 class="topbar-title">Commandes</h3>
+        <div class="profile-section" data-profile-menu>
+          <button class="profile-trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+            <span class="profile-avatar">
+              {% if request.user.is_authenticated and request.user.avatar %}
+                <img src="{{ request.user.avatar.url }}" alt="Avatar" />
+              {% else %}
+                {% if request.user.is_authenticated %}
+                  {{ request.user.username|first|upper }}
+                {% else %}
+                  G
+                {% endif %}
+              {% endif %}
+            </span>
+            <span class="profile-info">
+              {% if request.user.is_authenticated %}
+                <p class="profile-name">{{ request.user.get_full_name|default:request.user.username }}</p>
+                <p class="profile-role">{% if request.user.is_staff %}Admin{% elif request.user.is_superuser %}Propriétaire{% else %}Utilisateur{% endif %}</p>
+              {% else %}
+                <p class="profile-name">Invité</p>
+                <p class="profile-role">Public</p>
+              {% endif %}
+            </span>
+            <span class="profile-chevron" aria-hidden="true">▾</span>
+          </button>
+          <div class="profile-menu" role="menu">
+            <a href="{% url 'profile_dynamic' %}" role="menuitem">👤 Profil</a>
+            <a href="/accounts/password_change/" role="menuitem">⚙️ Paramètres</a>
+            <a href="{% url 'home' %}" role="menuitem">👀 Vue visiteur</a>
+            <a href="{% url 'orders-page' %}" role="menuitem">📦 Commandes</a>
+            <a href="/accounts/logout/" role="menuitem" class="danger">🚪 Déconnexion</a>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="breadcrumb" aria-label="Fil d'Ariane">
+        <a href="/dashboard/">📊 Tableau de bord</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">📦 Commandes</span>
+      </nav>
+
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
+        <a href="/dashboard/" style="display:inline-flex; align-items:center; gap:8px; padding:10px 16px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); border-radius:12px; color:#bfdbfe; text-decoration:none; font-weight:600; transition:all 180ms ease;">
+          ← Retour au Dashboard
+        </a>
+      </div>
+      <h1 style="display:none">Commandes</h1>
+      <p class="muted">Liste paginée des commandes (données réelles, mises à jour via ORM).</p>
+      <div class="table-wrap" role="region" aria-label="Tableau des commandes">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Client</th>
+              <th>Status</th>
+              <th>Total (DA)</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+              <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.user.get_full_name|default:order.user.username }}</td>
+                <td>
+                  {% with s=order.status|lower %}
+                    <span class="chip {{ s }}">{{ order.get_status_display|default:order.status|title }}</span>
+                  {% endwith %}
+                </td>
+                <td>{{ order.total|floatformat:0 }}</td>
+                <td>{{ order.created_at|date:"d M Y, H:i" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="5" style="text-align:center; color:var(--muted); padding:18px;">Aucune commande trouvée.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div class="pagination">
+          {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+          {% else %}
+            <span aria-disabled="true">Précédent</span>
+          {% endif %}
+
+          <span class="current">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Suivant</a>
+          {% else %}
+            <span aria-disabled="true">Suivant</span>
+          {% endif %}
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+<script>
+  (function() {
+    const containers = document.querySelectorAll('[data-profile-menu]');
+    containers.forEach(container => {
+      const trigger = container.querySelector('.profile-trigger');
+      const menu = container.querySelector('.profile-menu');
+      if (!trigger || !menu) return;
+      const items = Array.from(menu.querySelectorAll('[role="menuitem"]'));
+
+      const close = () => { menu.classList.remove('open'); trigger.setAttribute('aria-expanded','false'); };
+      const open = () => { menu.classList.add('open'); trigger.setAttribute('aria-expanded','true'); };
+      const toggle = () => menu.classList.contains('open') ? close() : open();
+
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggle();
+        if (menu.classList.contains('open') && items.length) items[0].focus();
+      });
+
+      trigger.addEventListener('keydown', (e) => {
+        if (['Enter',' ','ArrowDown'].includes(e.key)) {
+          e.preventDefault();
+          open();
+          if (items.length) items[0].focus();
+        }
+      });
+
+      menu.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { close(); trigger.focus(); }
+        if (['ArrowDown','ArrowUp'].includes(e.key)) {
+          e.preventDefault();
+          const current = items.indexOf(document.activeElement);
+          const dir = e.key === 'ArrowDown' ? 1 : -1;
+          const next = (current + dir + items.length) % items.length;
+          items[next]?.focus();
+        }
+      });
+
+      document.addEventListener('click', (e) => { if (!container.contains(e.target)) close(); });
+    });
+  })();
+</script>
+</html>

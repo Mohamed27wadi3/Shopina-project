@@ -1,0 +1,374 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile | Dynamic Experience</title>
+  <style>
+    :root {
+      --bg-1: #0f172a;
+      --bg-2: #1e293b;
+      --accent: #7c3aed;
+      --accent-2: #22d3ee;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --card: rgba(255, 255, 255, 0.04);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --shadow: 0 25px 80px rgba(15, 23, 42, 0.45);
+      --radius: 18px;
+      --transition: 180ms ease;
+      --cursor-size: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.24), transparent 32%),
+                  radial-gradient(circle at 80% 0%, rgba(34, 211, 238, 0.22), transparent 32%),
+                  linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      overflow-x: hidden;
+    }
+
+    /* Prefers-reduced-motion support */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+      .cursor, .cursor-ring { display: none; }
+    }
+
+    .page {
+      position: relative;
+      padding: clamp(18px, 2vw, 32px);
+      max-width: 1200px;
+      margin: 0 auto;
+      z-index: 1;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: clamp(18px, 3vw, 28px);
+      align-items: stretch;
+      margin-top: clamp(24px, 4vw, 42px);
+    }
+
+    .profile-card {
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: clamp(20px, 3vw, 28px);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      transform-style: preserve-3d;
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .profile-card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.16), transparent 55%);
+      transform: translate3d(var(--tilt-x, 0), var(--tilt-y, 0), 0);
+      opacity: 0.8;
+      transition: opacity var(--transition), transform var(--transition);
+      z-index: -1;
+    }
+
+    .profile-card:hover {
+      box-shadow: 0 35px 90px rgba(16, 24, 40, 0.6);
+      border-color: rgba(124, 58, 237, 0.35);
+    }
+
+    .profile-card h1 {
+      margin: 0 0 8px;
+      font-size: clamp(22px, 3vw, 28px);
+      letter-spacing: -0.01em;
+    }
+
+    .profile-card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 13px;
+      color: var(--text);
+      transition: transform var(--transition), border-color var(--transition);
+    }
+    .chip:hover { transform: translateY(-2px); border-color: rgba(124, 58, 237, 0.4); }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .btn {
+      position: relative;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.3);
+    }
+    .btn:hover { transform: translateY(-2px); border-color: rgba(124, 58, 237, 0.45); box-shadow: 0 16px 38px rgba(15, 23, 42, 0.35); }
+    .btn:active { transform: translateY(0); box-shadow: 0 6px 18px rgba(15, 23, 42, 0.28); }
+    .btn-primary { background: linear-gradient(120deg, #7c3aed, #22d3ee); border: none; color: #0b1221; }
+    .btn-ghost { background: rgba(255, 255, 255, 0.08); }
+
+    .btn .ripple {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at var(--x) var(--y), rgba(255, 255, 255, 0.25), transparent 45%);
+      transform: scale(0);
+      opacity: 0;
+      transition: transform 200ms ease, opacity 260ms ease;
+      pointer-events: none;
+    }
+
+    .btn:active .ripple { transform: scale(1.8); opacity: 1; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .field:hover { border-color: rgba(34, 211, 238, 0.5); transform: translateY(-1px); }
+    .label { font-size: 13px; color: var(--muted); letter-spacing: 0.01em; }
+    .value { font-weight: 600; }
+
+    .footer-note {
+      margin-top: 18px;
+      font-size: 14px;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* Custom cursor */
+    .cursor, .cursor-ring {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--cursor-size);
+      height: var(--cursor-size);
+      border-radius: 999px;
+      pointer-events: none;
+      mix-blend-mode: difference;
+      z-index: 10;
+      transition: transform 80ms ease;
+    }
+
+    .cursor {
+      background: #fff;
+      transform: translate(-50%, -50%) scale(0.6);
+    }
+
+    .cursor-ring {
+      width: calc(var(--cursor-size) * 2.4);
+      height: calc(var(--cursor-size) * 2.4);
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      transform: translate(-50%, -50%) scale(1);
+      transition: transform 160ms ease, border-color 160ms ease;
+    }
+
+    .cursor.active { transform: translate(-50%, -50%) scale(0.95); }
+    .cursor-ring.active { transform: translate(-50%, -50%) scale(1.1); border-color: rgba(124, 58, 237, 0.6); }
+
+    /* Entry animation */
+    .fade-up { opacity: 0; transform: translateY(10px); animation: fadeUp 0.7s ease forwards; }
+    .fade-up:nth-child(2) { animation-delay: 0.08s; }
+    .fade-up:nth-child(3) { animation-delay: 0.14s; }
+    .fade-up:nth-child(4) { animation-delay: 0.18s; }
+
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+    /* Responsive tweaks */
+    @media (max-width: 640px) {
+      .actions { flex-direction: column; }
+      .btn { width: 100%; justify-content: center; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="cursor" aria-hidden="true"></div>
+  <div class="cursor-ring" aria-hidden="true"></div>
+  <main class="page">
+    <section class="hero">
+      <article class="profile-card fade-up" id="profile-card" aria-labelledby="profile-title">
+        <div class="header">
+          <h1 id="profile-title">Salut, Wadi</h1>
+          <p>Entrepreneur · Seller chez Shopina</p>
+        </div>
+
+        <div class="chip-row">
+          <span class="chip">Niveau: Pro</span>
+          <span class="chip">2FA activée</span>
+          <span class="chip">Dernière connexion: il y a 2h</span>
+        </div>
+
+        <div class="actions" aria-label="Actions de profil">
+          <button class="btn btn-primary" data-action="primary">
+            Mettre à jour
+            <span class="ripple"></span>
+          </button>
+          <button class="btn btn-ghost" data-action="secondary">
+            Activer 2FA
+            <span class="ripple"></span>
+          </button>
+        </div>
+
+        <div class="grid">
+          <div class="field" role="group" aria-label="Email">
+            <span class="label">Email</span>
+            <span class="value">ghrib27wadi@gmail.com</span>
+          </div>
+          <div class="field" role="group" aria-label="Téléphone">
+            <span class="label">Téléphone</span>
+            <span class="value">+213 6 12 34 56 78</span>
+          </div>
+          <div class="field" role="group" aria-label="Adresse">
+            <span class="label">Adresse</span>
+            <span class="value">Alger, Algérie</span>
+          </div>
+          <div class="field" role="group" aria-label="Boutique">
+            <span class="label">Boutique</span>
+            <span class="value">ma-boutique.shopina.com</span>
+          </div>
+        </div>
+
+        <div class="footer-note" aria-live="polite">
+          <span aria-hidden="true">⚡</span>
+          Mouvement 3D réactif au curseur. Passez la souris pour voir l'effet.
+        </div>
+      </article>
+
+      <article class="profile-card fade-up" style="--delay:0.1s">
+        <h2 style="margin: 0 0 10px; font-size: 20px;">Sécurité & 2FA</h2>
+        <div class="grid">
+          <div class="field" role="group" aria-label="2FA">
+            <span class="label">Statut 2FA</span>
+            <span class="value">Activée</span>
+          </div>
+          <div class="field" role="group" aria-label="Dernier changement de mot de passe">
+            <span class="label">Mot de passe modifié</span>
+            <span class="value">Il y a 5 jours</span>
+          </div>
+          <div class="field" role="group" aria-label="Sessions actives">
+            <span class="label">Sessions actives</span>
+            <span class="value">2 appareils</span>
+          </div>
+          <div class="field" role="group" aria-label="Récupération">
+            <span class="label">Codes de secours</span>
+            <span class="value">8 restants</span>
+          </div>
+        </div>
+        <div class="actions" style="margin-top:14px;">
+          <button class="btn btn-primary" data-action="2fa">Gérer la 2FA<span class="ripple"></span></button>
+          <button class="btn btn-ghost" data-action="recovery">Codes de secours<span class="ripple"></span></button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    (function(){
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const card = document.getElementById('profile-card');
+      const cursor = document.querySelector('.cursor');
+      const ring = document.querySelector('.cursor-ring');
+      let rafId = null;
+
+      function setCursor(x, y, active = false) {
+        if (!cursor || !ring) return;
+        cursor.style.transform = `translate(${x}px, ${y}px) scale(${active ? 0.9 : 0.6}) translate(-50%, -50%)`;
+        ring.style.transform = `translate(${x}px, ${y}px) scale(${active ? 1.1 : 1}) translate(-50%, -50%)`;
+        ring.classList.toggle('active', active);
+        cursor.classList.toggle('active', active);
+      }
+
+      function handlePointer(e) {
+        const x = e.clientX;
+        const y = e.clientY;
+        setCursor(x, y, e.buttons === 1);
+
+        if (!card || prefersReduced) return;
+        const rect = card.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = (x - cx) / rect.width;
+        const dy = (y - cy) / rect.height;
+        const tiltX = dy * -10;
+        const tiltY = dx * 10;
+        card.style.setProperty('--tilt-x', `${tiltY * 6}px`);
+        card.style.setProperty('--tilt-y', `${tiltX * 6}px`);
+        card.style.transform = `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+      }
+
+      function resetTilt() {
+        if (!card) return;
+        card.style.transform = 'perspective(1200px) rotateX(0) rotateY(0)';
+        card.style.setProperty('--tilt-x', '0px');
+        card.style.setProperty('--tilt-y', '0px');
+      }
+
+      window.addEventListener('pointermove', (e) => {
+        if (prefersReduced) return;
+        cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => handlePointer(e));
+      });
+
+      window.addEventListener('pointerdown', (e) => setCursor(e.clientX, e.clientY, true));
+      window.addEventListener('pointerup', (e) => setCursor(e.clientX, e.clientY, false));
+      window.addEventListener('mouseleave', resetTilt);
+
+      // Buttons ripple
+      document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const rect = btn.getBoundingClientRect();
+          const ripple = btn.querySelector('.ripple');
+          if (!ripple) return;
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          ripple.style.setProperty('--x', `${x}px`);
+          ripple.style.setProperty('--y', `${y}px`);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

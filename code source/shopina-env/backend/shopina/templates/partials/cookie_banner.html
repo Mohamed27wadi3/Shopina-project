@@ -1,0 +1,36 @@
+<div id="cookie-banner" role="dialog" aria-modal="true" aria-labelledby="cookie-title" aria-describedby="cookie-desc" style="position:fixed; bottom:20px; left:20px; right:20px; max-width:680px; margin:0 auto; background:#111827; color:#e5e7eb; border:1px solid #374151; border-radius:12px; padding:14px; box-shadow:0 18px 50px rgba(0,0,0,0.35); display:none;">
+  <div style="display:flex; gap:12px; align-items:flex-start;">
+    <div aria-hidden="true" style="width:10px; height:10px; border-radius:50%; background:linear-gradient(135deg,#3b82f6,#06b6d4);"></div>
+    <div style="flex:1;">
+      <h2 id="cookie-title" style="margin:0 0 4px; font-size:16px;">Cookies et confidentialité</h2>
+      <p id="cookie-desc" style="margin:0; font-size:13px; color:#9ca3af;">Nous utilisons des cookies pour améliorer votre expérience, sécuriser vos sessions et analyser l'usage. Choisissez vos préférences.</p>
+    </div>
+    <button id="cookie-close" aria-label="Fermer" style="background:transparent; border:none; color:#9ca3af; cursor:pointer;">✕</button>
+  </div>
+  <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+    <button id="cookie-accept" style="background:#10b981; color:#062e29; border:none; padding:8px 12px; border-radius:10px; font-weight:700; cursor:pointer;">Tout accepter</button>
+    <button id="cookie-reject" style="background:#ef4444; color:#2b0b0b; border:none; padding:8px 12px; border-radius:10px; font-weight:700; cursor:pointer;">Refuser non essentiels</button>
+  </div>
+</div>
+<script>
+(function(){
+  const KEY = 'shopina.cookies.preferences.v1';
+  const banner = document.getElementById('cookie-banner');
+  const accept = document.getElementById('cookie-accept');
+  const reject = document.getElementById('cookie-reject');
+  const close = document.getElementById('cookie-close');
+  const pref = localStorage.getItem(KEY);
+  function show(){ banner.style.display = 'block'; }
+  function hide(){ banner.style.display = 'none'; }
+  if(!pref){ show(); }
+  accept && accept.addEventListener('click', function(){
+    localStorage.setItem(KEY, JSON.stringify({ essential:true, analytics:true, marketing:false, date:Date.now() }));
+    hide();
+  });
+  reject && reject.addEventListener('click', function(){
+    localStorage.setItem(KEY, JSON.stringify({ essential:true, analytics:false, marketing:false, date:Date.now() }));
+    hide();
+  });
+  close && close.addEventListener('click', hide);
+})();
+</script>

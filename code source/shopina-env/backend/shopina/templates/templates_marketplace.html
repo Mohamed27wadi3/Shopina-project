@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Templates · Shopina</title>
+  <meta name="description" content="Parcourez et prévisualisez les templates pour votre boutique Shopina." />
+  <style>
+    body { margin:0; font-family: Inter, system-ui; background:#0f172a; color:#e5e7eb; }
+    header { display:flex; justify-content:space-between; align-items:center; padding:14px 20px; border-bottom:1px solid #23324a; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:14px; padding:16px; }
+    .card { border:1px solid #23324a; background:#15213a; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
+    .thumb { aspect-ratio: 16/10; background:#0b162f; display:grid; place-items:center; color:#60a5fa; font-weight:800; }
+    .thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+    .meta { padding:12px; display:flex; flex-direction:column; gap:6px; }
+    .actions { display:flex; gap:8px; }
+    .btn { padding:8px 10px; border-radius:10px; border:1px solid #334155; cursor:pointer; background:#0b132b; color:#93c5fd; font-weight:700; }
+    .btn.primary { background:linear-gradient(135deg,#3b82f6,#06b6d4); color:#062a2f; border:none; }
+    .toolbar { display:flex; gap:8px; padding:12px 16px; }
+    input, select { background:#0b132b; color:#e5e7eb; border:1px solid #334155; padding:8px 10px; border-radius:8px; }
+    dialog { width:90vw; max-width:1100px; height:80vh; border:none; border-radius:12px; padding:0; background:#0f172a; color:#e5e7eb; }
+    dialog::backdrop { background: rgba(0,0,0,0.6); }
+    .preview-head { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #23324a; }
+    .preview-body { height: calc(80vh - 54px); display:grid; grid-template-columns: 1fr 320px; }
+    iframe { width:100%; height:100%; border:0; background:#0b132b; }
+    .customizer { border-left:1px solid #23324a; padding:12px; display:flex; flex-direction:column; gap:8px; }
+    label { font-size:13px; color:#9ca3af; }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Templates Shopina</strong>
+    <nav>
+      <a href="/">Accueil</a>
+      <a href="/dashboard">Dashboard</a>
+    </nav>
+  </header>
+  <section class="toolbar" aria-label="Filtrage">
+    <input id="search" placeholder="Rechercher un template" aria-label="Rechercher" />
+    <select id="category" aria-label="Catégorie">
+      <option value="">Toutes les catégories</option>
+    </select>
+  </section>
+  <main class="grid" id="grid" aria-live="polite"></main>
+
+  <dialog id="previewDialog" aria-labelledby="previewTitle">
+    <div class="preview-head">
+      <strong id="previewTitle">Prévisualisation</strong>
+      <div class="actions">
+        <button class="btn" id="closePreview">Fermer</button>
+        <button class="btn primary" id="saveTheme">Activer ce template</button>
+      </div>
+    </div>
+    <div class="preview-body">
+      <iframe id="previewFrame" title="Aperçu du template"></iframe>
+      <div class="customizer">
+        <label>Couleur principale
+          <input type="color" id="colorPrimary" value="#3b82f6" />
+        </label>
+        <label>Police
+          <select id="fontFamily">
+            <option value="Inter, system-ui">Inter</option>
+            <option value="Segoe UI, system-ui">Segoe UI</option>
+            <option value="Roboto, system-ui">Roboto</option>
+          </select>
+        </label>
+        <label>Logo
+          <input type="url" id="logoUrl" placeholder="https://..." />
+        </label>
+      </div>
+    </div>
+  </dialog>
+
+  {% include 'partials/cookie_banner.html' %}
+
+  <script>
+    const apiBase = '/api/templates/';
+    const shopThemeApi = '/shop/api/theme/';
+    const grid = document.getElementById('grid');
+    const search = document.getElementById('search');
+    const category = document.getElementById('category');
+    const dialog = document.getElementById('previewDialog');
+    const frame = document.getElementById('previewFrame');
+    const previewTitle = document.getElementById('previewTitle');
+    const saveBtn = document.getElementById('saveTheme');
+    let templates = [], filtered = [], current;
+
+    function getCSRFToken(){
+      const name = 'csrftoken=';
+      const parts = document.cookie.split(';');
+      for(let p of parts){
+        p = p.trim();
+        if(p.startsWith(name)) return p.substring(name.length);
+      }
+      return null;
+    }
+
+    async function fetchTemplates(){
+      const res = await fetch(apiBase);
+      templates = await res.json();
+      const cats = [...new Set(templates.map(t=>t.category))];
+      for(const c of cats){
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c; category.appendChild(opt);
+      }
+      render();
+    }
+
+    function render(){
+      const q = (search.value||'').toLowerCase();
+      const cat = category.value||'';
+      filtered = templates.filter(t => (!cat || t.category===cat) && (!q || t.title.toLowerCase().includes(q)));
+      grid.innerHTML='';
+      for(const t of filtered){ grid.appendChild(card(t)); }
+    }
+
+    function card(t){
+      const el = document.createElement('article'); el.className='card';
+      const thumb = document.createElement('div'); thumb.className='thumb';
+      if(t.image){
+        const img = document.createElement('img'); img.src = t.image; img.alt = t.title + ' preview'; thumb.appendChild(img);
+      } else {
+        thumb.textContent = t.title;
+      }
+      const meta = document.createElement('div'); meta.className='meta';
+      const title = document.createElement('strong'); title.textContent = t.title;
+      const desc = document.createElement('p'); desc.textContent = t.description;
+      const actions = document.createElement('div'); actions.className='actions';
+      const preview = document.createElement('button'); preview.className='btn'; preview.textContent='Prévisualiser';
+      const activate = document.createElement('button'); activate.className='btn primary'; activate.textContent='Activer';
+      preview.addEventListener('click', () => openPreview(t));
+      activate.addEventListener('click', () => saveTheme(t));
+      actions.append(preview, activate); meta.append(title, desc, actions);
+      el.append(thumb, meta); return el;
+    }
+
+    function openPreview(t){
+      current = t; previewTitle.textContent = 'Prévisualisation · '+t.title; dialog.showModal();
+      const html = `<!doctype html><html><head><meta charset='utf-8'><style>
+        body{margin:0;display:grid;place-items:center;min-height:100vh;background:#0f172a;color:#e5e7eb;font-family:${fontFamily.value};}
+        .box{padding:24px;border-radius:16px;border:1px solid #23324a;background:#15213a}
+        .btn{padding:10px 12px;border-radius:10px;border:none;background:${colorPrimary.value};color:#062a2f;font-weight:800}
+      </style></head><body><div class='box'>${t.title}<br><img src='${logoUrl.value||''}' alt='Logo' style='max-width:160px;display:${logoUrl.value?'block':'none'};margin:8px auto;'><br><button class='btn'>CTA</button></div></body></html>`;
+      frame.srcdoc = html;
+    }
+
+    async function saveTheme(t){
+      current = t || current; if(!current) return;
+      const body = { template_id: current.id, options: { colorPrimary: colorPrimary.value, fontFamily: fontFamily.value, logoUrl: logoUrl.value } };
+      try{
+        const res = await fetch(shopThemeApi, {
+          method:'POST',
+          credentials:'same-origin',
+          headers:{ 'Content-Type':'application/json', 'X-CSRFToken': getCSRFToken() || '' },
+          body: JSON.stringify(body)
+        });
+        if(res.status === 401){ throw new Error('Veuillez vous connecter pour activer un template.'); }
+        if(res.status === 403){ throw new Error('Accès refusé (CSRF ou permissions).'); }
+        if(!res.ok){ throw new Error('Erreur '+res.status); }
+        alert('Template activé pour votre boutique'); dialog.close();
+      }catch(e){ alert('Impossible d\'enregistrer: '+e.message); }
+    }
+
+    document.getElementById('closePreview').addEventListener('click', ()=> dialog.close());
+    search.addEventListener('input', render);
+    category.addEventListener('change', render);
+    window.addEventListener('load', fetchTemplates);
+  </script>
+</body>
+</html>

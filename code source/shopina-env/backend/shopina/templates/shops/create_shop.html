@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer ma boutique - Shopina</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            width: 100%;
+            padding: 50px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #0A1A2F;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            color: #0A1A2F;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #0077FF;
+            box-shadow: 0 0 0 3px rgba(0, 119, 255, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #999;
+        }
+
+        .form-help {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .error-message {
+            color: #d32f2f;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        button,
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0077FF 0%, #5AC8FA 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 119, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 119, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #0A1A2F;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #0077FF;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #0077FF;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #2e7d32;
+        }
+
+        .error-box {
+            background: #ffebee;
+            border-left: 4px solid #d32f2f;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #c62828;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button,
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Créez votre boutique</h1>
+            <p>Commencez à vendre sur Shopina aujourd'hui</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="{% if message.tags %}{{ message.tags }}{% endif %}-box">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="info-box">
+            ℹ️ Une boutique bien configurée = plus de clients et de ventes
+        </div>
+
+        <form method="post" id="shopForm">
+            {% csrf_token %}
+
+            <!-- Shop Name -->
+            <div class="form-group">
+                <label for="id_name">Nom de la boutique *</label>
+                {% if form.name.errors %}
+                    {% for error in form.name.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+                {{ form.name }}
+                <div class="form-help">Minimum 3 caractères, visible par tous vos clients</div>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label for="id_description">Description</label>
+                {% if form.description.errors %}
+                    {% for error in form.description.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+                {{ form.description }}
+                <div class="form-help">Décrivez votre boutique, ce que vous vendez et vos valeurs</div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label for="id_email">Email de contact</label>
+                {% if form.email.errors %}
+                    {% for error in form.email.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+                {{ form.email }}
+                <div class="form-help">Utilisé pour les demandes de renseignements des clients</div>
+            </div>
+
+            <!-- Phone -->
+            <div class="form-group">
+                <label for="id_phone">Téléphone</label>
+                {% if form.phone.errors %}
+                    {% for error in form.phone.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+                {{ form.phone }}
+                <div class="form-help">Numéro de contact pour les clients importants</div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="button-group">
+                <a href="/dashboard/" class="btn btn-secondary">← Retour</a>
+                <button type="submit" class="btn btn-primary">
+                    <span id="buttonText">Créer ma boutique</span>
+                    <span class="loading" id="loading">
+                        <span class="spinner"></span>
+                        Création en cours...
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('shopForm').addEventListener('submit', function() {
+            document.getElementById('buttonText').style.display = 'none';
+            document.getElementById('loading').classList.add('active');
+            document.querySelector('button[type="submit"]').disabled = true;
+        });
+    </script>
+</body>
+</html>
