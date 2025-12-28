@@ -1,53 +1,376 @@
-# Shopina — Projet e-commerce
+# 🛒 Shopina - E-Commerce Platform
 
-Résumé
--------
-Shopina est une application de boutique en ligne composée d'un front-end (Vite + React + TypeScript) et d'un back-end Django REST (Django + DRF). Ce dépôt contient le code source du front et du back ; le back est conçu pour fournir des API REST sécurisées (JWT) compatibles avec le front fourni.
+Une plateforme de commerce électronique moderne et complète construite avec **React (Frontend)** et **Django (Backend)**.
 
-Principaux points techniques
----------------------------
-- Back-end: Django 5.2 + Django REST Framework + Simple JWT pour l'authentification
-- Front-end: Vite + React + TypeScript (déjà fourni dans `front/`)
-- Architecture: apps Django séparées par domaine (`users`, `shop`, `orders`) (respect du pattern MVT / séparation des responsabilités)
-- Tests de base et commande de seed pour peupler la base avec les produits d'exemple
+## 📋 Table des matières
 
-Arborescence principale
-----------------------
-- `backend/` : serveur Django
-  - `shopina/` : configuration projet
-  - `users/`, `shop/`, `orders/` : apps Django
-- `front/` : application frontend (Vite/React)
+- [Caractéristiques](#-caractéristiques)
+- [Stack Technologique](#-stack-technologique)
+- [Installation](#-installation)
+- [Démarrage Rapide](#-démarrage-rapide)
+- [Structure du Projet](#-structure-du-projet)
+- [Configuration](#-configuration)
+- [Fonctionnalités](#-fonctionnalités)
+- [API Documentation](#-api-documentation)
+- [Dépannage](#-dépannage)
 
-Installation (développement)
----------------------------
-1. Créer un environnement virtuel et installer les dépendances (depuis `backend/`):
+## ✨ Caractéristiques
+
+- **Authentification Sécurisée**: Support OAuth, JWT, et authentification traditionnelle
+- **Gestion des Paniers**: Fonctionnalités complètes de panier persistant
+- **Système de Commandes**: Gestion complète des commandes clients
+- **Paiements Intégrés**: Support Stripe pour les transactions sécurisées
+- **Notifications**: Système de notification pour les utilisateurs
+- **Revues et Évaluations**: Système d'avis produits
+- **Dashboard**: Interface d'administration avec statistiques
+- **Gestion Multi-Boutiques**: Support pour plusieurs vendeurs
+- **Interface Responsive**: Design adapté à tous les appareils
+
+## 🛠 Stack Technologique
+
+### Frontend
+- **React 18** - Bibliothèque UI
+- **Vite** - Bundler rapide
+- **TypeScript** - Typage statique
+- **Radix UI** - Composants headless
+- **CSS personnalisé** - Styling
+
+### Backend
+- **Django 5.2.7** - Framework web Python
+- **Django REST Framework** - API RESTful
+- **Django Allauth** - Authentification sociale
+- **djangorestframework-simplejwt** - JWT tokens
+- **Stripe** - Paiements
+- **Pillow** - Traitement d'images
+- **drf-spectacular** - Documentation API
+
+### Base de données
+- **SQLite** (développement)
+- Support PostgreSQL pour production
+
+## 🚀 Installation
+
+### Prérequis
+
+- **Node.js** 16+ 
+- **Python** 3.10+
+- **pip** (gestionnaire de paquets Python)
+- **Git**
+
+### 1. Cloner le Repo
 
 ```bash
-python -m venv .venv
-source .venv/Scripts/activate    # Windows: .venv\Scripts\activate
+git clone https://github.com/Mohamed27wadi3/Shopina-project.git
+cd Shopina-project
+```
+
+### 2. Configuration Backend
+
+```bash
+# Naviguer vers le dossier backend
+cd "code source/shopina-env/backend"
+
+# Créer un environnement virtuel
+python -m venv venv
+
+# Activer l'environnement (Windows)
+venv\Scripts\activate
+# Sur macOS/Linux
+source venv/bin/activate
+
+# Installer les dépendances
 pip install -r requirements.txt
-```
 
-2. Mettre à jour les settings si besoin (fichier `backend/shopina/settings.py`)
-
-3. Créer les migrations et migrer la base de données:
-
-```bash
-python manage.py makemigrations
+# Appliquer les migrations
 python manage.py migrate
+
+# Créer un utilisateur administrateur
+python manage.py createsuperuser
+
+# Charger les données de test (optionnel)
+python manage.py seed_data
 ```
 
-4. Seed (peupler) la base avec des produits d'exemple:
+### 3. Configuration Frontend
 
 ```bash
-python manage.py seed_products
+# Naviguer vers le dossier frontend
+cd "code source/front"
+
+# Installer les dépendances
+npm install
+
+# Créer un fichier .env.local
+echo VITE_API_URL=http://localhost:8000/api > .env.local
 ```
 
-5. Lancer le serveur Django:
+## 🎯 Démarrage Rapide
+
+### Terminal 1 - Backend
 
 ```bash
+cd "code source/shopina-env/backend"
 python manage.py runserver
 ```
+✅ Backend disponible: `http://127.0.0.1:8000`
+
+### Terminal 2 - Frontend
+
+```bash
+cd "code source/front"
+npm run dev
+```
+✅ Frontend disponible: `http://localhost:3000`
+
+### 📊 Admin Panel
+
+- URL: `http://127.0.0.1:8000/admin`
+- Utilisateur: `admin` (celui créé avec `createsuperuser`)
+
+## 📁 Structure du Projet
+
+```
+Shopina-project/
+├── code source/
+│   ├── front/                          # React Frontend (Vite)
+│   │   ├── src/
+│   │   │   ├── components/             # Composants React réutilisables
+│   │   │   ├── pages/                  # Pages/Routes
+│   │   │   ├── services/               # Services API
+│   │   │   ├── context/                # Contextes React
+│   │   │   ├── styles/                 # Feuilles de style
+│   │   │   ├── data/                   # Données statiques
+│   │   │   └── App.tsx
+│   │   ├── package.json
+│   │   ├── vite.config.ts
+│   │   └── tsconfig.json
+│   │
+│   └── shopina-env/backend/            # Django Backend
+│       ├── shopina/                    # Configuration principale
+│       ├── users/                      # App utilisateurs
+│       ├── shops/                      # App boutiques
+│       ├── shop/                       # App produits
+│       ├── orders/                     # App commandes
+│       ├── carts/                      # App paniers
+│       ├── payments/                   # App paiements
+│       ├── notifications/              # App notifications
+│       ├── reviews/                    # App revues/évaluations
+│       ├── manage.py
+│       ├── requirements.txt
+│       ├── db.sqlite3
+│       └── settings.py
+│
+├── cahier de charge/                   # Documentation projet
+├── plan de travail et Task/            # Planification
+└── README.md                           # Ce fichier
+```
+
+## ⚙️ Configuration
+
+### Backend - Fichier Settings
+
+Éditer `code source/shopina-env/backend/shopina/settings.py` pour configurer:
+
+```python
+# Mode développement
+DEBUG = True
+
+# Hôtes autorisés
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+# Base de données
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+# CORS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+```
+
+### Frontend - Fichier .env.local
+
+```env
+VITE_API_URL=http://localhost:8000/api
+VITE_APP_NAME=Shopina
+```
+
+## 🎨 Fonctionnalités Principales
+
+### 👤 Authentification
+- ✅ Inscription/Connexion
+- ✅ OAuth (Google, GitHub, Facebook)
+- ✅ JWT Tokens
+- ✅ Profil utilisateur
+- ✅ Authentification à deux facteurs
+
+### 🛍️ Produits & Boutiques
+- ✅ Catalogue de produits
+- ✅ Gestion de plusieurs boutiques
+- ✅ Catégories et filtres
+- ✅ Recherche avancée
+- ✅ Images produits optimisées
+
+### 🛒 Panier & Commandes
+- ✅ Panier persistant
+- ✅ Gestion des stocks
+- ✅ Historique des commandes
+- ✅ Statuts de livraison
+- ✅ Suivi des commandes
+
+### 💳 Paiements
+- ✅ Intégration Stripe
+- ✅ Paiements sécurisés
+- ✅ Confirmation de transaction
+- ✅ Factures
+
+### ⭐ Évaluations & Revues
+- ✅ Système d'avis utilisateurs
+- ✅ Notation produits
+- ✅ Photos de revues
+
+### 📊 Dashboard
+- ✅ Statistiques de ventes
+- ✅ Graphiques analytiques
+- ✅ Gestion des produits
+- ✅ Gestion des commandes
+
+## 📚 API Documentation
+
+### Endpoints Principaux
+
+#### Utilisateurs
+```
+POST   /api/users/register/           - Inscription
+POST   /api/users/login/              - Connexion
+GET    /api/users/profile/            - Profil utilisateur
+PUT    /api/users/profile/            - Mise à jour profil
+POST   /api/users/logout/             - Déconnexion
+```
+
+#### Produits
+```
+GET    /api/shop/products/            - Liste des produits
+GET    /api/shop/products/{id}/       - Détail d'un produit
+POST   /api/shop/products/            - Créer un produit (vendeur)
+PUT    /api/shop/products/{id}/       - Modifier un produit (vendeur)
+DELETE /api/shop/products/{id}/       - Supprimer un produit (vendeur)
+```
+
+#### Commandes
+```
+GET    /api/orders/                   - Mes commandes
+POST   /api/orders/                   - Créer une commande
+GET    /api/orders/{id}/              - Détail commande
+PUT    /api/orders/{id}/              - Mettre à jour statut
+```
+
+#### Paiements
+```
+POST   /api/payments/create-intent/   - Créer intention de paiement
+POST   /api/payments/confirm/         - Confirmer le paiement
+GET    /api/payments/history/         - Historique paiements
+```
+
+Pour la documentation complète interactive, consulter `/api/schema/swagger/` après le démarrage du serveur.
+
+## 🐛 Dépannage
+
+### ❌ Erreur: "Cannot compute Sum"
+**Cause**: Agrégation SQL complexe dans l'endpoint dashboard/stats
+**Solution**: Vérifier `code source/shopina-env/backend/orders/views.py` ligne 148
+
+### ❌ Port déjà utilisé
+```bash
+# Frontend avec port différent
+npm run dev -- --port 3001
+
+# Backend avec port différent
+python manage.py runserver 8001
+```
+
+### ❌ Problèmes de CORS
+Vérifier `CORS_ALLOWED_ORIGINS` dans les settings Django.
+
+### ❌ Module non trouvé
+```bash
+# Réinstaller les dépendances
+pip install -r requirements.txt --force-reinstall
+npm install --legacy-peer-deps
+```
+
+### ❌ Migrations non appliquées
+```bash
+python manage.py migrate
+python manage.py migrate --run-syncdb
+```
+
+## 📝 Commandes Utiles
+
+### Backend
+```bash
+# Créer des migrations
+python manage.py makemigrations
+
+# Appliquer les migrations
+python manage.py migrate
+
+# Charger des données d'exemple
+python manage.py seed_data
+
+# Créer un utilisateur admin
+python manage.py createsuperuser
+
+# Lancer les tests
+python manage.py test
+
+# Shell Django interactive
+python manage.py shell
+```
+
+### Frontend
+```bash
+# Lancer en développement
+npm run dev
+
+# Build pour production
+npm run build
+
+# Prévisualisation build
+npm run preview
+
+# Tests
+npm run test
+```
+
+## 🤝 Contribution
+
+1. Forker le projet
+2. Créer une branche (`git checkout -b feature/AmazingFeature`)
+3. Commit vos changements (`git commit -m 'Add AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrir une Pull Request
+
+## 📞 Support & Contact
+
+Pour toute question ou problème:
+- 📧 Ouvrir une [issue GitHub](https://github.com/Mohamed27wadi3/Shopina-project/issues)
+- 📱 Contacter l'équipe de développement
+
+## 📄 License
+
+Ce projet est sous license MIT. 
+
+---
+
+**Dernière mise à jour**: 28 Décembre 2025 ✅
+
+Développé avec ❤️ par l'équipe Shopina
 
 6. Lancer le front (depuis `front/`):
 
