@@ -57,11 +57,19 @@ Une plateforme de commerce électronique moderne et complète construite avec **
 - **pip** (gestionnaire de paquets Python)
 - **Git**
 
-### 1. Cloner le Repo
+### 1. Cloner le Repo (avec submodules)
+
+Pour récupérer automatiquement le frontend (submodule), utilisez:
 
 ```bash
-git clone https://github.com/Mohamed27wadi3/Shopina-project.git
+git clone --recurse-submodules https://github.com/Mohamed27wadi3/Shopina-project.git
 cd Shopina-project
+```
+
+Si vous avez déjà cloné sans submodules:
+
+```bash
+git submodule update --init --recursive
 ```
 
 ### 2. Configuration Backend
