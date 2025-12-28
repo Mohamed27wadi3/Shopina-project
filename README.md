@@ -8,6 +8,7 @@ Une plateforme de commerce électronique moderne et complète construite avec **
 - [Stack Technologique](#-stack-technologique)
 - [Installation](#-installation)
 - [Démarrage Rapide](#-démarrage-rapide)
+- [Quick Start Collaborateurs](#-quick-start-collaborateurs)
 - [Structure du Projet](#-structure-du-projet)
 - [Configuration](#-configuration)
 - [Fonctionnalités](#-fonctionnalités)
@@ -444,3 +445,40 @@ Notes: le backend utilise la librairie officielle `stripe` et crée un objet `Pa
 Contact
 -------
 Si vous voulez que je continue (tests plus complets, Docker, CI, intégration paiement, etc.), dites-moi exactement quelle priorité et je continue pas-à-pas.
+
+## 🚀 Quick Start Collaborateurs
+
+### Clonage avec submodules
+
+```bash
+git clone --recurse-submodules https://github.com/Mohamed27wadi3/Shopina-project.git
+cd Shopina-project
+```
+
+Si déjà cloné sans submodules :
+
+```bash
+git submodule update --init --recursive
+```
+
+### Lancer Backend (Django)
+
+```bash
+cd "code source/shopina-env/backend"
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
+
+### Lancer Frontend (Vite/React)
+
+```bash
+cd "code source/front"
+npm install
+npm run dev
+```
+
+### Variables d’environnement rapides
+
+- Frontend: créer `.env.local` avec `VITE_API_URL=http://localhost:8000/api`
+- Backend: créer `.env` si nécessaire (voir section Configuration)
