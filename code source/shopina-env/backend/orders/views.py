@@ -2,7 +2,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
-from django.db.models import Count, DecimalField, F, Sum, Value
+from django.db.models import Count, DecimalField, ExpressionWrapper, F, Sum, Value
 from django.db.models.functions import Coalesce, TruncDate
 from django.utils import timezone
 from rest_framework import generics, permissions
@@ -148,7 +148,12 @@ class DashboardStatsView(APIView):
             .annotate(
                 quantity=Coalesce(Sum('quantity'), Value(0)),
                 revenue=Coalesce(
-                    Sum(F('price') * F('quantity')),
+                    Sum(
+                        ExpressionWrapper(
+                            F('price') * F('quantity'),
+                            output_field=DecimalField(max_digits=10, decimal_places=2),
+                        )
+                    ),
                     Value(0, output_field=DecimalField(max_digits=10, decimal_places=2)),
                 ),
             )
