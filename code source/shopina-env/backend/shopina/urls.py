@@ -22,10 +22,10 @@ from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 from django.views.generic.base import RedirectView
 
-from .views import DashboardView, CreateOrderView, CreateProductView
+from .views import DashboardView, CreateOrderView, CreateProductView, ProfileDynamicView
 from .views import ClientsListPageView, FrontendIndexView
 from shops.views import MyShopRedirectView
-from orders.views import OrdersListPageView
+from orders.views import OrdersListPageView, OrderDetailPageView
 
 urlpatterns = [
     path('api/templates/', include('templates.urls')),
@@ -37,12 +37,14 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/', include('allauth.urls')),  # allauth social auth
 
-    # Static profile demo page (animated)
-    path('profile-dynamic/', TemplateView.as_view(template_name='profile_dynamic.html'), name='profile_dynamic'),
+    # Static profile demo page (animated) - requires authentication
+    path('profile-dynamic/', ProfileDynamicView.as_view(), name='profile_dynamic'),
 
     # Dashboard (HTML template)
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
+    path('profile-settings/', TemplateView.as_view(template_name='profile_settings.html'), name='profile-settings'),
     path('orders/', OrdersListPageView.as_view(), name='orders-page'),
+    path('orders/<int:pk>/', OrderDetailPageView.as_view(), name='order-detail'),
     path('orders/create/', CreateOrderView.as_view(), name='create-order'),
     path('products/create/', CreateProductView.as_view(), name='create-product'),
     path('clients/', ClientsListPageView.as_view(), name='clients-page'),

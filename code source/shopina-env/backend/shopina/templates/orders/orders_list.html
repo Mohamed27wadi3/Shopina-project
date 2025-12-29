@@ -1,258 +1,664 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Commandes | Shopina</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-      .topbar { background: var(--panel); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
-      .topbar-title { font-size: 16px; font-weight: 700; margin: 0; }
-      .profile-section { position: relative; display: flex; align-items: center; gap: 12px; padding-left: 12px; border-left: 1px solid var(--border); }
-      .profile-trigger { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:12px; background:transparent; border:1px solid transparent; cursor:pointer; color: var(--text); transition: all 200ms ease; }
-      .profile-trigger:hover { border-color: var(--border); background: rgba(59,130,246,0.08); }
-      .profile-trigger:focus-visible { outline:2px solid rgba(59,130,246,0.45); outline-offset:3px; }
-      .profile-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #0ea5e9); display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size:14px; }
-      .profile-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
-      .profile-info { line-height: 1.2; }
-      .profile-name { font-size: 13px; font-weight: 700; margin: 0; }
-      .profile-role { font-size: 11px; color: #93c5fd; font-weight: 600; margin: 2px 0 0; }
-      .profile-chevron { font-size:12px; color:#94a3b8; }
-      .profile-menu { position:absolute; right:0; top:calc(100% + 8px); min-width: 220px; background:#0f172a; border:1px solid var(--border); border-radius:12px; box-shadow:0 20px 48px rgba(0,0,0,0.26); padding:8px; display:none; flex-direction:column; gap:4px; z-index:40; }
-      .profile-menu.open { display:flex; animation: fadeDown 160ms ease; }
-      .profile-menu a { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; color:var(--text); text-decoration:none; font-weight:600; transition:all 180ms ease; }
-      .profile-menu a:hover, .profile-menu a:focus-visible { background: rgba(59,130,246,0.14); color:#bfdbfe; outline:none; }
-      .profile-menu .danger { color:#fca5a5; }
-      .profile-menu .danger:hover, .profile-menu .danger:focus-visible { background: rgba(248,113,113,0.15); }
-    :root {
-      --bg: #0b1220;
-      --panel: #0f172a;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --border: rgba(148,163,184,0.16);
-      --accent: #3b82f6;
-      --radius: 14px;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-    .layout { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
-    .sidebar { background: #0f172a; border-right: 1px solid var(--border); padding: 18px 14px; display: flex; flex-direction: column; }
-    .sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .sidebar-logo { margin: 0; font-weight: 800; color: #3b82f6; font-size: 16px; }
-    .home-button { background: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%); border: none; color: #fff; width: 38px; height: 38px; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; transition: all 300ms ease; text-decoration: none; flex-shrink: 0; }
-    .home-button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-    .home-button:active { transform: translateY(0); }
-    .sidebar-menu { padding: 16px 12px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
-    .sidebar-menu-item { display: flex; flex-direction: column; gap: 8px; }
-    .sidebar-menu-button { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 10px; background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: var(--text); text-decoration: none; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 300ms ease; }
-    .sidebar-menu-button:hover { background: rgba(59,130,246,0.25); border-color: rgba(59,130,246,0.6); transform: translateX(4px); }
-    .sidebar-menu-button:active { transform: translateX(2px); }
-    .sidebar-menu-button.home { background: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%); border-color: #3b82f6; color: #fff; }
-    .sidebar-menu-button.home:hover { transform: translateX(4px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-    .sidebar-menu-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; padding: 0 14px 8px; margin-top: 8px; }
-    .breadcrumb { display:flex; align-items:center; gap:8px; padding:12px 24px; background:rgba(59,130,246,0.08); border-bottom:1px solid var(--border); font-size:13px; color:var(--muted); }
-    .breadcrumb a { color:#3b82f6; text-decoration:none; transition:all 200ms ease; }
-    .breadcrumb a:hover { color:#0ea5e9; text-decoration:underline; }
-    .breadcrumb-separator { color:var(--muted-light); margin:0 4px; }
-    .breadcrumb-current { color:var(--text); font-weight:600; }
-    .nav-title { margin: 0 0 12px; font-weight: 800; letter-spacing: -0.02em; }
-    .nav { display: flex; flex-direction: column; gap: 10px; }
-    .nav a { display: block; padding: 12px 14px; border-radius: 12px; color: var(--text); text-decoration: none; background: rgba(148,163,184,0.08); border: 1px solid var(--border); transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease; }
-    .nav a:hover { transform: translateX(4px); border-color: rgba(59,130,246,0.5); box-shadow: 0 10px 30px rgba(59,130,246,0.2); }
-    .nav a.active { border-color: rgba(59,130,246,0.8); background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(34,211,238,0.12)); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commandes | Shopina</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    main { padding: 24px; }
-    h1 { margin: 0 0 10px; font-size: 26px; letter-spacing: -0.02em; }
-    .muted { color: var(--muted); margin: 0 0 18px; }
-    .table-wrap { background: #0f172a; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-    table { width: 100%; border-collapse: collapse; color: var(--text); }
-    th, td { padding: 12px 14px; text-align: left; font-size: 14px; }
-    thead { background: rgba(148,163,184,0.08); }
-    tbody tr { border-top: 1px solid var(--border); }
-    tbody tr:hover { background: rgba(59,130,246,0.06); }
-    .chip { display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
-    .chip.completed { background: rgba(16,185,129,0.18); color: #34d399; }
-    .chip.processing { background: rgba(59,130,246,0.2); color: #bfdbfe; }
-    .chip.pending { background: rgba(245,158,11,0.2); color: #fcd34d; }
-    .chip.cancelled { background: rgba(239,68,68,0.18); color: #f87171; }
-    .pagination { display: flex; gap: 8px; padding: 14px; align-items: center; justify-content: flex-end; background: #0f172a; border-top: 1px solid var(--border); }
-    .pagination a, .pagination span { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); color: var(--text); text-decoration: none; font-weight: 600; }
-    .pagination a:hover { border-color: rgba(59,130,246,0.5); }
-    .pagination .current { background: rgba(59,130,246,0.16); border-color: rgba(59,130,246,0.6); }
-    @keyframes fadeDown { from { opacity:0; transform: translateY(-4px); } to { opacity:1; transform: translateY(0); } }
+        :root {
+            --color-bg-primary: #0f1419;
+            --color-bg-secondary: #1a1f2e;
+            --color-bg-tertiary: #252d3d;
+            --color-bg-hover: rgba(255, 255, 255, 0.03);
+            
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #b0b8c8;
+            --color-text-muted: #8490a0;
+            
+            --color-accent: #3b82f6;
+            --color-accent-light: rgba(59, 130, 246, 0.12);
+            --color-accent-dark: #2563eb;
+            
+            --color-border: rgba(148, 163, 184, 0.08);
+            --color-border-light: rgba(148, 163, 184, 0.15);
+            
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.18);
+            
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            
+            --duration-fast: 150ms;
+            --duration-normal: 300ms;
+            --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .sidebar { display: none; } main { padding: 16px; } table { font-size: 13px; } }
-    @media (prefers-reduced-motion: reduce) { .nav a, .pagination a { transition: none; transform: none !important; box-shadow: none !important; } }
-  </style>
+        [data-theme="light"] {
+            --color-bg-primary: #f8f9fc;
+            --color-bg-secondary: #ffffff;
+            --color-bg-tertiary: #f1f3f8;
+            
+            --color-text-primary: #0f172a;
+            --color-text-secondary: #475569;
+            --color-text-muted: #64748b;
+            
+            --color-border: rgba(15, 23, 42, 0.06);
+            --color-border-light: rgba(15, 23, 42, 0.1);
+            
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.1);
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* LAYOUT */
+        .orders-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--color-bg-secondary);
+            border-right: 1px solid var(--color-border);
+            padding: var(--spacing-lg);
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--color-accent);
+        }
+
+        .sidebar__logo {
+            font-size: 24px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--color-accent), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: var(--spacing-lg);
+            text-decoration: none;
+            cursor: pointer;
+            display: block;
+        }
+
+        .sidebar__nav {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .sidebar__nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: 12px var(--spacing-md);
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            transition: all var(--duration-fast) var(--easing-smooth);
+            cursor: pointer;
+        }
+
+        .sidebar__nav-item:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-accent);
+            transform: translateX(4px);
+        }
+
+        .sidebar__nav-item.active {
+            background: var(--color-accent-light);
+            color: var(--color-accent);
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            margin-left: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        .header {
+            height: 70px;
+            background: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 var(--spacing-xl);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            gap: var(--spacing-lg);
+        }
+
+        .header__title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .header__right {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-left: auto;
+        }
+
+        .theme__toggle {
+            width: 40px;
+            height: 40px;
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text-primary);
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--duration-fast) var(--easing-smooth);
+        }
+
+        .theme__toggle:hover {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            transform: rotate(15deg);
+        }
+
+        /* PROFILE MENU */
+        .profile-menu {
+            position: relative;
+        }
+
+        .profile-trigger {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: 6px 12px;
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--easing-smooth);
+            color: var(--color-text-primary);
+        }
+
+        .profile-trigger:hover {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            transform: translateY(-2px);
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-accent), #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            line-height: 1.2;
+        }
+
+        .profile-name {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .profile-role {
+            font-size: 11px;
+            color: var(--color-text-muted);
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            min-width: 240px;
+            background: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px) scale(0.95);
+            transition: all var(--duration-normal) cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 1001;
+        }
+
+        .profile-dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        .profile-dropdown__item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            color: var(--color-text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--easing-smooth);
+        }
+
+        .profile-dropdown__item:hover {
+            background: var(--color-accent-light);
+            color: var(--color-accent);
+        }
+
+        .profile-dropdown__item.danger {
+            color: var(--color-danger);
+        }
+
+        .profile-dropdown__item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* CONTENT */
+        .content {
+            flex: 1;
+            padding: var(--spacing-xl);
+            overflow-y: auto;
+        }
+
+        .content__header {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .content__title {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .content__subtitle {
+            font-size: 15px;
+            color: var(--color-text-secondary);
+        }
+
+        /* TABLE */
+        .table-container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table thead {
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        .table th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--color-text-primary);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--color-border);
+            font-size: 14px;
+        }
+
+        .table tbody tr:hover {
+            background: var(--color-bg-hover);
+        }
+
+        /* STATUS CHIPS */
+        .status-chip {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-chip.completed {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .status-chip.processing {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--color-accent);
+        }
+
+        .status-chip.pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+
+        .status-chip.cancelled {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--color-danger);
+        }
+
+        /* ACTION BUTTONS */
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+            background: transparent;
+            color: var(--color-text-primary);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all var(--duration-fast) var(--easing-smooth);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn.primary {
+            background: var(--color-accent);
+            border-color: var(--color-accent);
+            color: white;
+        }
+
+        .btn.primary:hover {
+            background: var(--color-accent-dark);
+            border-color: var(--color-accent-dark);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn.danger {
+            color: var(--color-danger);
+        }
+
+        .btn.danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--color-danger);
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .empty-state__icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state__title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .empty-state__subtitle {
+            color: var(--color-text-secondary);
+            margin-bottom: 20px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .header {
+                padding: 0 var(--spacing-md);
+            }
+
+            .content {
+                padding: var(--spacing-md);
+            }
+
+            .content__title {
+                font-size: 24px;
+            }
+
+            .table {
+                font-size: 12px;
+            }
+
+            .table th, .table td {
+                padding: 10px;
+            }
+
+            .action-buttons {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="layout">
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h2 class="sidebar-logo">Shopina</h2>
-      </div>
-      
-      <!-- MAIN MENU -->
-      <div class="sidebar-menu">
-        <div class="sidebar-menu-item">
-          <a href="{% url 'home' %}" class="sidebar-menu-button" title="Page d'accueil publique">
-            <span>Accueil public</span>
-          </a>
-          <a href="/dashboard/" class="sidebar-menu-button home" title="Tableau de bord">
-            <span>📊</span>
-            <span>Dashboard</span>
-          </a>
-        </div>
-      </div>
+    <div class="orders-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <a href="http://localhost:3000/" class="sidebar__logo">
+                🛍️ Shopina
+            </a>
 
-      <div class="sidebar-menu-label">Pages</div>
-      <nav class="nav" aria-label="Navigation principale">
-        <a href="/dashboard/">Dashboard</a>
-        <a href="/orders/" class="active">Commandes</a>
-      </nav>
-    </aside>
+            <nav class="sidebar__nav">
+                <a href="{% url 'dashboard' %}" class="sidebar__nav-item">
+                    <span>📊</span> Tableau de bord
+                </a>
+                <a href="{% url 'orders-page' %}" class="sidebar__nav-item active">
+                    <span>📦</span> Commandes
+                </a>
+                <a href="{% url 'clients-page' %}" class="sidebar__nav-item">
+                    <span>👥</span> Clients
+                </a>
+            </nav>
+        </aside>
 
-    <main>
-      <div class="topbar">
-        <h3 class="topbar-title">Commandes</h3>
-        <div class="profile-section" data-profile-menu>
-          <button class="profile-trigger" type="button" aria-haspopup="menu" aria-expanded="false">
-            <span class="profile-avatar">
-              {% if request.user.is_authenticated and request.user.avatar %}
-                <img src="{{ request.user.avatar.url }}" alt="Avatar" />
-              {% else %}
-                {% if request.user.is_authenticated %}
-                  {{ request.user.username|first|upper }}
+        <!-- MAIN -->
+        <div class="main">
+            <!-- HEADER -->
+            <header class="header">
+                <h1 class="header__title">Commandes</h1>
+
+                <div class="header__right">
+                    <button class="theme__toggle" id="themeToggle">🌓</button>
+
+                    <div class="profile-menu">
+                        <button class="profile-trigger" id="profileTrigger">
+                            <div class="profile-avatar">
+                                {% if request.user.avatar %}
+                                    <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}">
+                                {% else %}
+                                    {{ request.user.username|first|upper }}
+                                {% endif %}
+                            </div>
+                            <div class="profile-info">
+                                <div class="profile-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                                <div class="profile-role">Utilisateur</div>
+                            </div>
+                        </button>
+
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <a href="{% url 'profile_dynamic' %}" class="profile-dropdown__item">
+                                <span>👤</span> Profil
+                            </a>
+                            <a href="/profile-settings/" class="profile-dropdown__item">
+                                <span>⚙️</span> Paramètres
+                            </a>
+                            <a href="/accounts/logout/" class="profile-dropdown__item danger">
+                                <span>🚪</span> Déconnexion
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- CONTENT -->
+            <main class="content">
+                <div class="content__header">
+                    <h2 class="content__title">Gestion des commandes</h2>
+                    <p class="content__subtitle">Suivez et gérez toutes vos commandes en un seul endroit</p>
+                </div>
+
+                {% if orders %}
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Commande #</th>
+                                <th>Client</th>
+                                <th>Montant</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td><strong>#{{ order.id }}</strong></td>
+                                <td>{{ order.user.get_full_name|default:order.user.username }}</td>
+                                <td><strong>{{ order.total|floatformat:2 }} DA</strong></td>
+                                <td>
+                                    <span class="status-chip {% if order.status == 'completed' %}completed{% elif order.status == 'processing' %}processing{% elif order.status == 'pending' %}pending{% elif order.status == 'cancelled' %}cancelled{% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ order.created_at|date:"d/m/Y" }}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="{% url 'order-detail' order.id %}" class="btn primary">Voir</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                  G
+                <div class="table-container">
+                    <div class="empty-state">
+                        <div class="empty-state__icon">📭</div>
+                        <h3 class="empty-state__title">Aucune commande</h3>
+                        <p class="empty-state__subtitle">Vous n'avez pas encore de commandes</p>
+                        <a href="{% url 'create-order' %}" class="btn primary">Créer une commande</a>
+                    </div>
+                </div>
                 {% endif %}
-              {% endif %}
-            </span>
-            <span class="profile-info">
-              {% if request.user.is_authenticated %}
-                <p class="profile-name">{{ request.user.get_full_name|default:request.user.username }}</p>
-                <p class="profile-role">{% if request.user.is_staff %}Admin{% elif request.user.is_superuser %}Propriétaire{% else %}Utilisateur{% endif %}</p>
-              {% else %}
-                <p class="profile-name">Invité</p>
-                <p class="profile-role">Public</p>
-              {% endif %}
-            </span>
-            <span class="profile-chevron" aria-hidden="true">▾</span>
-          </button>
-          <div class="profile-menu" role="menu">
-            <a href="{% url 'profile_dynamic' %}" role="menuitem">👤 Profil</a>
-            <a href="/accounts/password_change/" role="menuitem">⚙️ Paramètres</a>
-            <a href="{% url 'home' %}" role="menuitem">👀 Vue visiteur</a>
-            <a href="{% url 'orders-page' %}" role="menuitem">📦 Commandes</a>
-            <a href="/accounts/logout/" role="menuitem" class="danger">🚪 Déconnexion</a>
-          </div>
+            </main>
         </div>
-      </div>
-      
-      <nav class="breadcrumb" aria-label="Fil d'Ariane">
-        <a href="/dashboard/">📊 Tableau de bord</a>
-        <span class="breadcrumb-separator">/</span>
-        <span class="breadcrumb-current">📦 Commandes</span>
-      </nav>
+    </div>
 
-      <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
-        <a href="/dashboard/" style="display:inline-flex; align-items:center; gap:8px; padding:10px 16px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); border-radius:12px; color:#bfdbfe; text-decoration:none; font-weight:600; transition:all 180ms ease;">
-          ← Retour au Dashboard
-        </a>
-      </div>
-      <h1 style="display:none">Commandes</h1>
-      <p class="muted">Liste paginée des commandes (données réelles, mises à jour via ORM).</p>
-      <div class="table-wrap" role="region" aria-label="Tableau des commandes">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Client</th>
-              <th>Status</th>
-              <th>Total (DA)</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for order in orders %}
-              <tr>
-                <td>{{ order.id }}</td>
-                <td>{{ order.user.get_full_name|default:order.user.username }}</td>
-                <td>
-                  {% with s=order.status|lower %}
-                    <span class="chip {{ s }}">{{ order.get_status_display|default:order.status|title }}</span>
-                  {% endwith %}
-                </td>
-                <td>{{ order.total|floatformat:0 }}</td>
-                <td>{{ order.created_at|date:"d M Y, H:i" }}</td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="5" style="text-align:center; color:var(--muted); padding:18px;">Aucune commande trouvée.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-        <div class="pagination">
-          {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}">Précédent</a>
-          {% else %}
-            <span aria-disabled="true">Précédent</span>
-          {% endif %}
+    <script>
+        // Theme Management
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        
+        html.setAttribute('data-theme', currentTheme);
 
-          <span class="current">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
 
-          {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">Suivant</a>
-          {% else %}
-            <span aria-disabled="true">Suivant</span>
-          {% endif %}
-        </div>
-      </div>
-    </main>
-  </div>
+        // Profile Dropdown
+        const profileTrigger = document.getElementById('profileTrigger');
+        const profileDropdown = document.getElementById('profileDropdown');
+
+        profileTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!profileDropdown.contains(e.target) && e.target !== profileTrigger) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+    </script>
 </body>
-<script>
-  (function() {
-    const containers = document.querySelectorAll('[data-profile-menu]');
-    containers.forEach(container => {
-      const trigger = container.querySelector('.profile-trigger');
-      const menu = container.querySelector('.profile-menu');
-      if (!trigger || !menu) return;
-      const items = Array.from(menu.querySelectorAll('[role="menuitem"]'));
-
-      const close = () => { menu.classList.remove('open'); trigger.setAttribute('aria-expanded','false'); };
-      const open = () => { menu.classList.add('open'); trigger.setAttribute('aria-expanded','true'); };
-      const toggle = () => menu.classList.contains('open') ? close() : open();
-
-      trigger.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggle();
-        if (menu.classList.contains('open') && items.length) items[0].focus();
-      });
-
-      trigger.addEventListener('keydown', (e) => {
-        if (['Enter',' ','ArrowDown'].includes(e.key)) {
-          e.preventDefault();
-          open();
-          if (items.length) items[0].focus();
-        }
-      });
-
-      menu.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') { close(); trigger.focus(); }
-        if (['ArrowDown','ArrowUp'].includes(e.key)) {
-          e.preventDefault();
-          const current = items.indexOf(document.activeElement);
-          const dir = e.key === 'ArrowDown' ? 1 : -1;
-          const next = (current + dir + items.length) % items.length;
-          items[next]?.focus();
-        }
-      });
-
-      document.addEventListener('click', (e) => { if (!container.contains(e.target)) close(); });
-    });
-  })();
-</script>
 </html>

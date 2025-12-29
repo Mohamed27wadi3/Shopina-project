@@ -13,6 +13,7 @@ from .views import (
     UserDetailView,
     UserStatisticsView
 )
+from .html_views import ProfileHTMLView, ChangePasswordHTMLView
 from .social_views import google_login, github_login, remember_me_login
 
 app_name = 'users'
@@ -28,9 +29,13 @@ urlpatterns = [
     path('auth/github/', github_login, name='github_login'),
     path('auth/remember-me/', remember_me_login, name='remember_me_login'),
     
-    # Profile
+    # Profile (API)
     path('profile/', ProfileView.as_view(), name='profile'),
     path('change-password/', ChangePasswordView.as_view(), name='change_password'),
+    
+    # Profile (HTML) - For Django session authentication
+    path('profile-page/', ProfileHTMLView.as_view(), name='profile_html'),
+    path('change-password-page/', ChangePasswordHTMLView.as_view(), name='change_password_html'),
     
     # Password Reset
     path('password-reset/', PasswordResetRequestView.as_view(), name='password_reset'),

@@ -5,12 +5,15 @@ from django.contrib.auth import get_user_model
 from django.db.models import Count, DecimalField, ExpressionWrapper, F, Sum, Value
 from django.db.models.functions import Coalesce, TruncDate
 from django.utils import timezone
+from django.shortcuts import get_object_or_404, render
+from django.http import HttpResponse
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
+from django.views import View
 from shop.models import Product
 from .models import Order, OrderItem
 from .serializers import CreateOrderSerializer, OrderSerializer
@@ -57,6 +60,25 @@ class OrdersListPageView(ListView):
             .order_by("-created_at")
         )
     permission_classes = [permissions.IsAuthenticated]
+
+
+class OrderDetailPageView(View):
+    """HTML view: order detail page."""
+    
+    template_name = "orders/order_detail.html"
+    
+    def get(self, request, pk):
+        # Get order with all related data
+        order = get_object_or_404(
+            Order.objects.select_related("user").prefetch_related("items__product"), 
+            pk=pk
+        )
+        
+        context = {
+            'order': order,
+            'items_count': order.items.count(),
+        }
+        return render(request, self.template_name, context)
 
 
 class DashboardStatsView(APIView):

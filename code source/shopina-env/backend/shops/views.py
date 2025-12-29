@@ -29,7 +29,7 @@ class MyShopRedirectView(LoginRequiredMixin, View):
             shop = request.user.shop
             # User has a shop, redirect to dashboard
             return redirect('shop:dashboard', slug=shop.slug)
-        except Shop.DoesNotExist:
+        except (Shop.DoesNotExist, AttributeError):
             # User doesn't have a shop, redirect to create
             return redirect('shop:create')
 
@@ -42,8 +42,11 @@ class CreateShopView(LoginRequiredMixin, CreateView):
     model = Shop
     form_class = ShopCreationForm
     template_name = 'shops/create_shop.html'
-    success_url = reverse_lazy('shop:dashboard')
     login_url = reverse_lazy('login')
+    
+    def get_success_url(self):
+        # Return dashboard URL with the shop slug
+        return reverse_lazy('shop:dashboard', kwargs={'slug': self.object.slug})
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -66,7 +69,7 @@ class CreateShopView(LoginRequiredMixin, CreateView):
         shop.save()
         
         messages.success(self.request, f'✅ Boutique "{shop.name}" créée avec succès!')
-        return redirect(self.get_success_url())
+        return super().form_valid(form)
     
     def form_invalid(self, form):
         messages.error(self.request, 'Erreur lors de la création de la boutique.')
@@ -83,21 +86,28 @@ class ShopDashboardView(LoginRequiredMixin, View):
     def get(self, request, slug=None):
         try:
             # Get the user's shop
+            if not hasattr(request.user, 'shop'):
+                messages.info(request, '🏪 Vous devez d\'abord créer une boutique.')
+                return redirect('shop:create')
+                
             shop = request.user.shop
             
             # Verify the slug matches (security check)
             if slug and shop.slug != slug:
                 messages.error(request, 'Accès refusé.')
-                return redirect('shop:my-shop')
+                return redirect('shop:dashboard', slug=shop.slug)
             
             context = {
                 'shop': shop,
                 'page_title': f'Tableau de bord - {shop.name}',
             }
             return render(request, self.template_name, context)
-        except Shop.DoesNotExist:
-            messages.info(request, 'Vous devez d\'abord créer une boutique.')
+        except (Shop.DoesNotExist, AttributeError) as e:
+            messages.info(request, '🏪 Vous devez d\'abord créer une boutique.')
             return redirect('shop:create')
+        except Exception as e:
+            messages.error(request, f'Erreur: {str(e)}')
+            return redirect('dashboard')
 
 
 class UpdateShopView(LoginRequiredMixin, View):

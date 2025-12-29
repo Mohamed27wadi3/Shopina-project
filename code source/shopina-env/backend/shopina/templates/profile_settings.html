@@ -1,0 +1,530 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paramètres | Shopina</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-bg-primary: #0f1419;
+            --color-bg-secondary: #1a1f2e;
+            --color-bg-tertiary: #252d3d;
+            --color-bg-hover: rgba(255, 255, 255, 0.03);
+            
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #b0b8c8;
+            --color-text-muted: #8490a0;
+            
+            --color-accent: #3b82f6;
+            --color-accent-light: rgba(59, 130, 246, 0.12);
+            --color-accent-dark: #2563eb;
+            
+            --color-border: rgba(148, 163, 184, 0.08);
+            --color-border-light: rgba(148, 163, 184, 0.15);
+            
+            --color-success: #10b981;
+            --color-danger: #ef4444;
+            
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.18);
+            
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            
+            --duration-fast: 150ms;
+            --duration-normal: 300ms;
+            --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="light"] {
+            --color-bg-primary: #f8f9fc;
+            --color-bg-secondary: #ffffff;
+            --color-bg-tertiary: #f1f3f8;
+            
+            --color-text-primary: #0f172a;
+            --color-text-secondary: #475569;
+            --color-text-muted: #64748b;
+            
+            --color-border: rgba(15, 23, 42, 0.06);
+            --color-border-light: rgba(15, 23, 42, 0.1);
+            
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.1);
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* LAYOUT */
+        .settings-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--color-bg-secondary);
+            border-right: 1px solid var(--color-border);
+            padding: var(--spacing-lg);
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar__logo {
+            font-size: 24px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--color-accent), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: var(--spacing-lg);
+            text-decoration: none;
+            cursor: pointer;
+            display: block;
+        }
+
+        .sidebar__nav {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .sidebar__nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: 12px var(--spacing-md);
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            transition: all var(--duration-fast) var(--easing-smooth);
+        }
+
+        .sidebar__nav-item:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-accent);
+            transform: translateX(4px);
+        }
+
+        .sidebar__nav-item.active {
+            background: var(--color-accent-light);
+            color: var(--color-accent);
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            margin-left: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        .header {
+            height: 70px;
+            background: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 var(--spacing-xl);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header__title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .theme__toggle {
+            width: 40px;
+            height: 40px;
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text-primary);
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--duration-fast) var(--easing-smooth);
+        }
+
+        .theme__toggle:hover {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            transform: rotate(15deg);
+        }
+
+        /* CONTENT */
+        .content {
+            flex: 1;
+            padding: var(--spacing-xl);
+            overflow-y: auto;
+            max-width: 900px;
+        }
+
+        .content__header {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .content__title {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .content__subtitle {
+            font-size: 15px;
+            color: var(--color-text-secondary);
+        }
+
+        /* SETTINGS SECTION */
+        .settings-section {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title__icon {
+            font-size: 24px;
+        }
+
+        /* FORM */
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--color-text-primary);
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all var(--duration-fast) var(--easing-smooth);
+        }
+
+        .form-input:hover,
+        .form-select:hover {
+            border-color: var(--color-accent-light);
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px var(--color-accent-light);
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+            background: transparent;
+            color: var(--color-text-primary);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all var(--duration-fast) var(--easing-smooth);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn.primary {
+            background: var(--color-accent);
+            border-color: var(--color-accent);
+            color: white;
+        }
+
+        .btn.primary:hover {
+            background: var(--color-accent-dark);
+            border-color: var(--color-accent-dark);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn.danger {
+            color: var(--color-danger);
+        }
+
+        .btn.danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--color-danger);
+            color: var(--color-danger);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+        }
+
+        /* DANGER ZONE */
+        .danger-zone {
+            border-color: var(--color-danger);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(239, 68, 68, 0.02));
+        }
+
+        .danger-zone .section-title {
+            color: var(--color-danger);
+        }
+
+        /* MESSAGES */
+        .message {
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-md);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .message.success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--color-danger);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .content {
+                padding: var(--spacing-md);
+            }
+
+            .content__title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <a href="http://localhost:3000/" class="sidebar__logo">
+                🛍️ Shopina
+            </a>
+
+            <nav class="sidebar__nav">
+                <a href="{% url 'dashboard' %}" class="sidebar__nav-item">
+                    <span>📊</span> Tableau de bord
+                </a>
+                <a href="{% url 'orders-page' %}" class="sidebar__nav-item">
+                    <span>📦</span> Commandes
+                </a>
+                <a href="{% url 'clients-page' %}" class="sidebar__nav-item">
+                    <span>👥</span> Clients
+                </a>
+            </nav>
+        </aside>
+
+        <!-- MAIN -->
+        <div class="main">
+            <!-- HEADER -->
+            <header class="header">
+                <h1 class="header__title">Paramètres</h1>
+                <button class="theme__toggle" id="themeToggle">🌓</button>
+            </header>
+
+            <!-- CONTENT -->
+            <main class="content">
+                <div class="content__header">
+                    <h2 class="content__title">Vos paramètres</h2>
+                    <p class="content__subtitle">Gérez votre compte et vos préférences</p>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                            📢 {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- PASSWORD CHANGE SECTION -->
+                <div class="settings-section">
+                    <h3 class="section-title">
+                        <span class="section-title__icon">🔐</span>
+                        Changer le mot de passe
+                    </h3>
+
+                    <form method="post" action="/api/users/change-password/">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="old_password">Mot de passe actuel</label>
+                            <input type="password" id="old_password" name="old_password" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="new_password1">Nouveau mot de passe</label>
+                            <input type="password" id="new_password1" name="new_password1" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="new_password2">Confirmer le mot de passe</label>
+                            <input type="password" id="new_password2" name="new_password2" class="form-input" required>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn primary">💾 Enregistrer</button>
+                            <button type="reset" class="btn">Annuler</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- PROFILE SECTION -->
+                <div class="settings-section">
+                    <h3 class="section-title">
+                        <span class="section-title__icon">👤</span>
+                        Informations du profil
+                    </h3>
+
+                    <form method="post" action="/api/users/profile/">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="first_name">Prénom</label>
+                            <input type="text" id="first_name" name="first_name" class="form-input" value="{{ request.user.first_name }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="last_name">Nom</label>
+                            <input type="text" id="last_name" name="last_name" class="form-input" value="{{ request.user.last_name }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email</label>
+                            <input type="email" id="email" name="email" class="form-input" value="{{ request.user.email }}">
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn primary">💾 Mettre à jour</button>
+                            <button type="reset" class="btn">Annuler</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- DANGER ZONE -->
+                <div class="settings-section danger-zone">
+                    <h3 class="section-title">
+                        <span class="section-title__icon">⚠️</span>
+                        Zone de danger
+                    </h3>
+
+                    <p style="color: var(--color-text-secondary); margin-bottom: var(--spacing-md);">
+                        Actions irreversibles qui affectent votre compte
+                    </p>
+
+                    <div class="btn-group">
+                        <a href="/accounts/logout/" class="btn danger">🚪 Déconnexion</a>
+                        <a href="{% url 'profile_dynamic' %}" class="btn">👤 Voir mon profil</a>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Theme Management
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        
+        html.setAttribute('data-theme', currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Form submission handler
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                // Vous pouvez ajouter une validation personnalisée ici si nécessaire
+            });
+        });
+    </script>
+</body>
+</html>

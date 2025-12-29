@@ -524,7 +524,7 @@
   <!-- Navbar -->
   <div class="navbar">
     <div class="navbar-content">
-      <a href="{% url 'dashboard' %}" class="navbar-brand">Shopina</a>
+      <a href="http://localhost:3000/" class="navbar-brand">Shopina</a>
       <div style="display:flex; align-items:center; gap:16px;">
         <div class="navbar-menu">
           <a href="{% url 'home' %}" class="navbar-menu-button" title="Page d'accueil publique">🏠 Accueil</a>
@@ -604,7 +604,7 @@
       </div>
       <div class="stat">
         <div class="stat-label">Taux d'activité</div>
-        <div class="stat-value">{% if stats.total > 0 %}{{ stats.active|floatformat:0|add:"0"|mul:100|div:stats.total|floatformat:0 }}%{% else %}0%{% endif %}</div>
+        <div class="stat-value">{{ stats.activity_rate }}%</div>
       </div>
     </div>
 
