@@ -178,6 +178,11 @@ def get_my_shop(request):
             'total_sales': float(shop.total_sales),
             'average_rating': shop.average_rating,
             'created_at': shop.created_at.isoformat(),
+            'owner': {
+                'id': request.user.id,
+                'username': request.user.username,
+                'email': request.user.email,
+            },
         })
     except Shop.DoesNotExist:
         return Response(
@@ -211,6 +216,36 @@ def create_shop_api(request):
         }, status=status.HTTP_201_CREATED)
     
     return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def public_shop(request, slug):
+    """
+    Public, read-only shop view by slug.
+    - Returns only active shops
+    - No owner-identifying data leaked
+    """
+    try:
+        shop = Shop.objects.get(slug=slug, is_active=True)
+    except Shop.DoesNotExist:
+        return Response({'detail': 'Shop not found or inactive.'}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response({
+        'id': shop.id,
+        'name': shop.name,
+        'slug': shop.slug,
+        'description': shop.description,
+        'email': shop.email,
+        'phone': shop.phone,
+        'logo': shop.logo.url if shop.logo else None,
+        'banner': shop.banner.url if shop.banner else None,
+        'is_active': shop.is_active,
+        'total_products': shop.total_products,
+        'total_orders': shop.total_orders,
+        'total_sales': float(shop.total_sales),
+        'average_rating': shop.average_rating,
+        'created_at': shop.created_at.isoformat(),
+    })
 
 
 @api_view(['POST'])
