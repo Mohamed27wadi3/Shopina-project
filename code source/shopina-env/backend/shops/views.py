@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 from .models import ShopTheme
+from shop.serializers import ProductSerializer
 
 from .models import Shop
 from .forms import ShopCreationForm, ShopUpdateForm
@@ -246,6 +247,19 @@ def public_shop(request, slug):
         'average_rating': shop.average_rating,
         'created_at': shop.created_at.isoformat(),
     })
+
+
+@api_view(['GET'])
+def public_shop_products(request, slug):
+    """Return public product list for a shop identified by slug."""
+    try:
+        shop = Shop.objects.get(slug=slug, is_active=True)
+    except Shop.DoesNotExist:
+        return Response({'detail': 'Shop not found or inactive.'}, status=status.HTTP_404_NOT_FOUND)
+
+    products = shop.products.all()
+    serializer = ProductSerializer(products, many=True, context={'request': request})
+    return Response(serializer.data)
 
 
 @api_view(['POST'])
