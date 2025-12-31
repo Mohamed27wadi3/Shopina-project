@@ -29,6 +29,34 @@ class UserDetailSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'role', 'is_verified', 'date_joined', 'last_password_change')
 
 
+class CustomerListSerializer(serializers.ModelSerializer):
+    """Serializer tailored for dashboard/client listing needs."""
+
+    total_orders = serializers.IntegerField(read_only=True)
+    total_spent = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        read_only=True,
+        coerce_to_string=False,
+    )
+
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'phone_number',
+            'avatar',
+            'city',
+            'date_joined',
+            'total_orders',
+            'total_spent',
+        )
+
+
 class UserUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating user profile."""
     

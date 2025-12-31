@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Category, Product
+from .models import Announcement
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -42,3 +43,23 @@ class ProductSerializer(serializers.ModelSerializer):
             if 'sku' not in v:
                 raise serializers.ValidationError('each variant must include a sku')
         return value
+
+
+class AnnouncementSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Announcement
+        fields = ('id', 'shop', 'title', 'message', 'image', 'created_at')
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        if obj.image:
+            try:
+                url = obj.image.url
+            except Exception:
+                url = obj.image
+            if request and url and not str(url).startswith('http'):
+                return request.build_absolute_uri(url)
+            return url
+        return None

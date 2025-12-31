@@ -6,6 +6,11 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import Category, Product
 from .serializers import CategorySerializer, ProductSerializer
+from .models import Announcement
+from .serializers import AnnouncementSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import parser_classes
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
@@ -147,3 +152,47 @@ def delete_product_api(request, product_id):
 
     product.delete()
     return Response({'message': 'Product deleted.'}, status=204)
+
+
+@api_view(['GET', 'POST'])
+def announcements_list(request):
+    """Create announcement (POST, authenticated merchant) or list all announcements (GET).
+    For creation, user must have `request.user.shop` set (merchant).
+    """
+    if request.method == 'GET':
+        announcements = Announcement.objects.all().select_related('shop')[:50]
+        serializer = AnnouncementSerializer(announcements, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    # POST: create announcement for authenticated user's shop
+    if request.method == 'POST':
+        if not request.user or not request.user.is_authenticated:
+            return Response({'detail': 'Authentication required.'}, status=401)
+        try:
+            shop = request.user.shop
+        except Exception:
+            return Response({'detail': 'You must have a shop to create an announcement.'}, status=400)
+
+        title = request.data.get('title') or request.POST.get('title')
+        message = request.data.get('message') or request.POST.get('message')
+        image = request.FILES.get('image')
+        if not title or not message:
+            return Response({'detail': 'title and message are required.'}, status=400)
+
+        ann = Announcement.objects.create(shop=shop, title=title, message=message, image=image)
+        serializer = AnnouncementSerializer(ann, context={'request': request})
+        return Response(serializer.data, status=201)
+
+
+@api_view(['GET'])
+def public_shop_announcements(request, slug):
+    """Return announcements for a public shop (by slug)."""
+    try:
+        from shops.models import Shop as ShopModel
+        shop = ShopModel.objects.get(slug=slug, is_active=True)
+    except Exception:
+        return Response({'detail': 'Shop not found.'}, status=404)
+
+    announcements = Announcement.objects.filter(shop=shop)
+    serializer = AnnouncementSerializer(announcements, many=True, context={'request': request})
+    return Response(serializer.data)

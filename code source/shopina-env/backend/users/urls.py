@@ -11,7 +11,8 @@ from .views import (
     TwoFactorVerifyView,
     UserListView,
     UserDetailView,
-    UserStatisticsView
+    UserStatisticsView,
+    CustomerListView,
 )
 from .html_views import ProfileHTMLView, ChangePasswordHTMLView
 from .social_views import google_login, github_login, remember_me_login
@@ -49,4 +50,5 @@ urlpatterns = [
     path('', UserListView.as_view(), name='user_list'),
     path('<int:pk>/', UserDetailView.as_view(), name='user_detail'),
     path('statistics/', UserStatisticsView.as_view(), name='user_statistics'),
+    path('customers/', CustomerListView.as_view(), name='customer_list'),
 ]
