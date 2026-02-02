@@ -497,3 +497,26 @@ npm run dev
 
 - Frontend: créer `.env.local` avec `VITE_API_URL=http://localhost:8000/api`
 - Backend: créer `.env` si nécessaire (voir section Configuration)
+
+## 📦 Website Builder (bundle frontend Vite)
+
+Le dossier `code source/front` provient d’un bundle « Website Builder » basé sur Vite. Pour l’exécuter indépendamment:
+
+1. `cd "code source/front"`
+2. `npm i`
+3. `npm run dev`
+
+### Tests end-to-end Playwright
+
+Le bundle inclut une suite Playwright pouvant tourner en mode mock ou réel:
+
+- Mode mock (par défaut): `npm run test:e2e`
+- Mode réel (nécessite backend sur `http://localhost:8000` et clés Stripe test):
+
+```
+E2E_REAL=1 PLAYWRIGHT_BASE_URL=http://127.0.0.1:5173 npm run test:e2e
+```
+
+Pour l’installation des navigateurs Playwright: `npm run test:e2e:install`.
+
+> Le test principal est `tests/checkout.spec.ts`. En CI, configurez `PLAYWRIGHT_BASE_URL` vers votre instance front déployée et n’activez `E2E_REAL=1` qu’avec un backend + Stripe disponibles.
