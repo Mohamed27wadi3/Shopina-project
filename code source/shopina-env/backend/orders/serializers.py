@@ -21,10 +21,24 @@ class CreateOrderItemSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
+    user = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = ('id', 'user', 'status', 'total', 'created_at', 'items')
+
+    def get_user(self, obj):
+        user = getattr(obj, 'user', None)
+        if not user:
+            return None
+        return {
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'phone_number': getattr(user, 'phone_number', None),
+        }
 
 
 class CreateOrderSerializer(serializers.ModelSerializer):

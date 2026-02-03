@@ -1,956 +1,799 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tableau de bord | Shopina</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      /* Dark theme (default) */
-      --bg: #0f172a;
-      --bg-secondary: #111e2e;
-      --panel: #1a2744;
-      --card: #1f2d3d;
-      --border: rgba(51, 117, 197, 0.12);
-      --border-light: rgba(100, 150, 220, 0.2);
-      --text: #e2e8f0;
-      --text-secondary: #cbd5e1;
-      --muted: #94a3b8;
-      --muted-light: #64748b;
-      --accent: #3b82f6;
-      --accent-bright: #0ea5e9;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --radius: 12px;
-      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
-      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-      --shadow-lg: 0 12px 32px rgba(59, 130, 246, 0.15);
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    /* Light theme */
-    [data-theme="light"] {
-      --bg: #f8fafc;
-      --bg-secondary: #f1f5f9;
-      --panel: #ffffff;
-      --card: #ffffff;
-      --border: rgba(51, 117, 197, 0.12);
-      --border-light: rgba(100, 150, 220, 0.1);
-      --text: #0f172a;
-      --text-secondary: #334155;
-      --muted: #64748b;
-      --muted-light: #94a3b8;
-      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-      --shadow-lg: 0 12px 32px rgba(59, 130, 246, 0.1);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      transition: background-color 0.4s ease, color 0.4s ease;
-    }
-    .layout {
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      min-height: 100vh;
-    }
-    /* ========== SIDEBAR ========== */
-    .sidebar {
-      background: var(--panel);
-      border-right: 1px solid var(--border);
-      padding: 0;
-      overflow-y: auto;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      transition: transform 0.3s ease;
-    }
-    .sidebar-header {
-      padding: 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .sidebar-logo {
-      font-size: 18px;
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-bright) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin: 0;
-      letter-spacing: -0.02em;
-    }
-    .home-button {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-bright) 100%);
-      border: none;
-      color: #fff;
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      transition: var(--transition);
-      text-decoration: none;
-      flex-shrink: 0;
-    }
-    .home-button:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-    .home-button:active {
-      transform: translateY(0);
-    }
-    /* ========== MAIN NAV MENU ========== */
-    .sidebar-menu {
-      padding: 16px 12px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 8px;
-    }
-    .sidebar-menu-item {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .sidebar-menu-button {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(34, 211, 238, 0.12));
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      color: var(--text);
-      text-decoration: none;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 14px;
-      transition: var(--transition);
-    }
-    .sidebar-menu-button:hover {
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(34, 211, 238, 0.2));
-      border-color: rgba(59, 130, 246, 0.6);
-      transform: translateX(4px);
-    }
-    .sidebar-menu-button:active {
-      transform: translateX(2px);
-    }
-    .sidebar-menu-button.home {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-bright) 100%);
-      border-color: var(--accent);
-      color: #fff;
-    }
-    .sidebar-menu-button.home:hover {
-      transform: translateX(4px);
-      box-shadow: var(--shadow-md);
-    }
-    .sidebar-menu-label {
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--muted-light);
-      padding: 0 14px 8px;
-      margin-top: 8px;
-    }
-    .sidebar-nav {
-      padding: 12px 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      border-radius: 10px;
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: var(--transition);
-    }
-    .nav-item:hover {
-      background: rgba(59, 130, 246, 0.1);
-      border-color: var(--border-light);
-      transform: translateX(2px);
-    }
-    .nav-item.active {
-      background: rgba(59, 130, 246, 0.15);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    .nav-icon {
-      font-size: 16px;
-      min-width: 20px;
-    }
-    /* ========== MAIN ========== */
-    .main {
-      display: flex;
-      flex-direction: column;
-    }
-    .topbar {
-      background: var(--panel);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
-    .topbar-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-      margin: 0;
-    }
-    .topbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .theme-toggle {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--text);
-      width: 38px;
-      height: 38px;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      transition: var(--transition);
-    }
-    .theme-toggle:hover {
-      border-color: var(--accent);
-      background: rgba(59, 130, 246, 0.1);
-    }
-    .profile-section {
-      position: relative;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding-left: 12px;
-      border-left: 1px solid var(--border);
-    }
-    .profile-trigger {
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:8px 10px;
-      border-radius:12px;
-      background: transparent;
-      border:1px solid transparent;
-      cursor:pointer;
-      color: var(--text);
-      transition: var(--transition);
-    }
-    .profile-trigger:focus-visible { outline:2px solid rgba(59,130,246,0.5); outline-offset:3px; }
-    .profile-trigger:hover { border-color: var(--border); background: rgba(59,130,246,0.08); }
-    .profile-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-bright) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      color: #fff;
-      font-size: 14px;
-      flex-shrink: 0;
-    }
-    .profile-avatar img {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    .profile-info {
-      line-height: 1.2;
-    }
-    .profile-name {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text);
-      margin: 0;
-    }
-    .profile-role {
-      font-size: 11px;
-      color: var(--accent);
-      font-weight: 600;
-      margin: 2px 0 0;
-    }
-    .profile-chevron { font-size:12px; color: var(--muted); }
-    .profile-menu {
-      position: absolute;
-      right: 0;
-      top: calc(100% + 8px);
-      min-width: 220px;
-      background: var(--panel);
-      border:1px solid var(--border);
-      border-radius: 14px;
-      box-shadow: 0 22px 60px rgba(0,0,0,0.22);
-      padding: 8px;
-      display: none;
-      flex-direction: column;
-      gap: 4px;
-      z-index: 20;
-    }
-    .profile-menu.open { display:flex; animation: fadeDown 160ms ease; }
-    .profile-menu a {
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 12px;
-      border-radius:10px;
-      color: var(--text);
-      text-decoration:none;
-      font-weight:600;
-      transition: var(--transition);
-    }
-    .profile-menu a:hover,
-    .profile-menu a:focus-visible {
-      background: rgba(59,130,246,0.12);
-      color: var(--accent-bright);
-      outline: none;
-    }
-    .profile-menu .danger { color:#f87171; }
-    .profile-menu .danger:hover,
-    .profile-menu .danger:focus-visible { background: rgba(248,113,113,0.12); }
-    @keyframes fadeDown { from { opacity:0; transform: translateY(-4px); } to { opacity:1; transform: translateY(0); } }
-    /* ========== BREADCRUMBS ========== */
-    .breadcrumb {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0 0 16px;
-      margin-bottom: 16px;
-      font-size: 13px;
-      color: var(--muted);
-      border-bottom: 1px solid var(--border);
-    }
-    .breadcrumb a {
-      color: var(--accent);
-      text-decoration: none;
-      transition: var(--transition);
-    }
-    .breadcrumb a:hover {
-      color: var(--accent-bright);
-      text-decoration: underline;
-    }
-    .breadcrumb-separator {
-      color: var(--muted-light);
-      margin: 0 4px;
-    }
-    .breadcrumb-current {
-      color: var(--text);
-      font-weight: 600;
-    }
-    /* ========== CONTENT ========== */
-    .content {
-      padding: 24px;
-      flex: 1;
-    }
-    .page-header {
-      margin-bottom: 24px;
-    }
-    .page-title {
-      font-size: 24px;
-      font-weight: 800;
-      margin: 0 0 6px;
-      letter-spacing: -0.02em;
-    }
-    .page-subtitle {
-      font-size: 13px;
-      color: var(--muted);
-      margin: 0;
-    }
-    .dash-grid {
-      display: grid;
-      gap: 14px;
-    }
-    .dash-grid.cards { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-    .dash-grid.split { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start; }
-    .dash-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px;
-      box-shadow: var(--shadow-md);
-      overflow: hidden;
-      cursor: pointer;
-      transition: var(--transition);
-      position: relative;
-    }
-    .dash-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--border-light);
-      box-shadow: var(--shadow-lg);
-    }
-    .dash-card:active {
-      transform: translateY(-1px);
-    }
-    .dash-card .dash-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: rgba(59, 130, 246, 0.15);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      margin-bottom: 8px;
-    }
-    .dash-card h3 {
-      margin: 8px 0 4px;
-      font-size: 24px;
-      letter-spacing: -0.02em;
-      font-weight: 700;
-    }
-    .dash-card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-    .dash-quick {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 12px;
-    }
-    .dash-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #fff;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-bright) 100%);
-      box-shadow: var(--shadow-md);
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      transition: var(--transition);
-    }
-    .dash-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
-    }
-    .dash-btn:active {
-      transform: translateY(0);
-    }
-    .dash-btn:focus-visible {
-      outline: 2px solid var(--accent-bright);
-      outline-offset: 2px;
-    }
-    .dash-quick-link {
-      display: block;
-      text-decoration: none;
-    }
-    .dash-quick-link-inner {
-      border: 1px solid var(--border);
-      background: var(--card);
-      color: var(--text);
-      padding: 14px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: var(--transition);
-      height: 100%;
-    }
-    .dash-quick-link-inner:hover {
-      transform: translateY(-2px);
-      border-color: var(--border-light);
-      box-shadow: var(--shadow-md);
-      background: rgba(59, 130, 246, 0.08);
-    }
-    .dash-panel {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 18px;
-      box-shadow: var(--shadow-md);
-    }
-    .dash-panel h4 {
-      margin: 0 0 12px;
-      font-size: 15px;
-      font-weight: 700;
-    }
-    .dash-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-    .dash-list li {
-      padding: 12px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: var(--transition);
-    }
-    .dash-list li:hover {
-      border-color: var(--border-light);
-      background: rgba(59, 130, 246, 0.05);
-    }
-    .dash-chip {
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-      display: inline-block;
-    }
-    .dash-chip.success {
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--success);
-    }
-    .dash-chip.warning {
-      background: rgba(245, 158, 11, 0.15);
-      color: var(--warning);
-    }
-    .dash-chip.danger {
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--danger);
-    }
-    .dash-chart {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--shadow-md);
-    }
-    canvas {
-      width: 100%;
-      height: auto;
-    }
-    .messages {
-      margin-bottom: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      animation: slideDown 0.3s ease;
-    }
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    .message {
-      padding: 12px 14px;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 13px;
-      border-left: 4px solid;
-    }
-    .message.success {
-      background: rgba(16, 185, 129, 0.12);
-      color: var(--success);
-      border-left-color: var(--success);
-    }
-    .message.info {
-      background: rgba(59, 130, 246, 0.12);
-      color: var(--accent);
-      border-left-color: var(--accent);
-    }
-    .message.warning {
-      background: rgba(245, 158, 11, 0.12);
-      color: var(--warning);
-      border-left-color: var(--warning);
-    }
-    .message.error {
-      background: rgba(239, 68, 68, 0.12);
-      color: var(--danger);
-      border-left-color: var(--danger);
-    }
-    /* Responsive */
-    @media (max-width: 768px) {
-      .layout { grid-template-columns: 1fr; }
-      .sidebar {
-        position: absolute;
-        left: 0;
-        top: 0;
-        height: 100vh;
-        width: 260px;
-        z-index: 100;
-        transform: translateX(-100%);
-        box-shadow: var(--shadow-lg);
-      }
-      .sidebar.open { transform: translateX(0); }
-      .content { padding: 16px; }
-      .page-title { font-size: 20px; }
-      .dash-grid.cards { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-    }
-    /* Animation & Motion */
-    @media (prefers-reduced-motion: reduce) {
-      * { transition: none !important; animation: none !important; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord | Shopina</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Colors - Dark Theme */
+            --color-bg-primary: #0f1419;
+            --color-bg-secondary: #1a1f2e;
+            --color-bg-tertiary: #252d3d;
+            --color-bg-hover: rgba(255, 255, 255, 0.03);
+            
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #b0b8c8;
+            --color-text-muted: #8490a0;
+            
+            --color-accent: #3b82f6;
+            --color-accent-light: rgba(59, 130, 246, 0.12);
+            --color-accent-dark: #2563eb;
+            
+            --color-border: rgba(148, 163, 184, 0.08);
+            --color-border-light: rgba(148, 163, 184, 0.15);
+            
+            --color-danger: #ef4444;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.18);
+            --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.25);
+            --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.15);
+            
+            /* Sizing */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            
+            /* Transitions */
+            --duration-fast: 150ms;
+            --duration-normal: 300ms;
+            --duration-slow: 500ms;
+            --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+            --easing-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        [data-theme="light"] {
+            --color-bg-primary: #f8f9fc;
+            --color-bg-secondary: #ffffff;
+            --color-bg-tertiary: #f1f3f8;
+            --color-bg-hover: rgba(0, 0, 0, 0.02);
+            
+            --color-text-primary: #0f172a;
+            --color-text-secondary: #475569;
+            --color-text-muted: #64748b;
+            
+            --color-border: rgba(15, 23, 42, 0.06);
+            --color-border-light: rgba(15, 23, 42, 0.1);
+            
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.12);
+            --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.08);
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="%233b82f6"/></svg>') 12 12, auto;
+        }
+
+        body.cursor-hover {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="%238b5cf6" opacity="0.6"/></svg>') 12 12, pointer;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+            background: var(--color-bg-primary);
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--color-bg-secondary);
+            border-right: 1px solid var(--color-border);
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: transform var(--duration-normal) var(--easing-smooth);
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--color-accent);
+            border-radius: 2px;
+        }
+
+        .sidebar__header {
+            padding: var(--spacing-lg) var(--spacing-md);
+            border-bottom: 1px solid var(--color-border);
+            position: sticky;
+            top: 0;
+            background: var(--color-bg-secondary);
+            z-index: 10;
+        }
+
+        .sidebar__logo {
+            font-size: 24px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--color-accent), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            transition: transform var(--duration-fast) var(--easing-smooth);
+        }
+
+        .sidebar__logo:hover {
+            transform: scale(1.05);
+        }
+
+        .sidebar__nav {
+            padding: var(--spacing-md) 0;
+        }
+
+        .sidebar__nav-section {
+            padding: var(--spacing-md) var(--spacing-md) 0;
+        }
+
+        .sidebar__nav-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-text-muted);
+            padding: 0 var(--spacing-md) var(--spacing-sm);
+        }
+
+        .sidebar__nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar__nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: 12px var(--spacing-md);
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            border-radius: var(--radius-md);
+            transition: all var(--duration-fast) var(--easing-smooth);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .sidebar__nav-item:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-accent);
+            transform: translateX(4px);
+        }
+
+        .sidebar__nav-item.active {
+            background: var(--color-accent-light);
+            color: var(--color-accent);
+        }
+
+        .sidebar__nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 6px;
+            bottom: 6px;
+            width: 3px;
+            background: var(--color-accent);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .sidebar__nav-icon {
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+            transition: transform var(--duration-fast) var(--easing-smooth);
+        }
+
+        .sidebar__nav-item:hover .sidebar__nav-icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .main {
+            flex: 1;
+            margin-left: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            height: 70px;
+            background: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 var(--spacing-xl);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            gap: var(--spacing-lg);
+        }
+
+        .header__left {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .header__title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .header__right {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-left: auto;
+        }
+
+        .theme__toggle {
+            width: 40px;
+            height: 40px;
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text-primary);
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--duration-fast) var(--easing-smooth);
+        }
+
+        .theme__toggle:hover {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+            transform: rotate(15deg);
+        }
+
+        .profile-menu {
+            position: relative;
+        }
+
+        .profile-trigger {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: 6px 12px;
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--easing-smooth);
+        }
+
+        .profile-trigger:hover {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-accent), #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .profile-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .profile-role {
+            font-size: 11px;
+            color: var(--color-text-muted);
+        }
+
+        .profile-chevron {
+            font-size: 12px;
+            color: var(--color-text-muted);
+            transition: transform var(--duration-fast) var(--easing-smooth);
+        }
+
+        .profile-trigger:hover .profile-chevron {
+            transform: translateY(2px);
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            min-width: 240px;
+            background: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px) scale(0.95);
+            transition: all var(--duration-normal) var(--easing-bounce);
+            z-index: 1001;
+        }
+
+        .profile-dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        .profile-dropdown__item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            color: var(--color-text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--easing-smooth);
+            position: relative;
+        }
+
+        .profile-dropdown__item:hover {
+            background: var(--color-accent-light);
+            color: var(--color-accent);
+            transform: translateX(4px);
+        }
+
+        .profile-dropdown__item.danger {
+            color: var(--color-danger);
+        }
+
+        .profile-dropdown__item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .profile-dropdown__icon {
+            font-size: 16px;
+        }
+
+        .content {
+            flex: 1;
+            padding: var(--spacing-xl);
+            overflow-y: auto;
+        }
+
+        .content__header {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .content__title {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--color-text-primary);
+            margin-bottom: 8px;
+        }
+
+        .content__subtitle {
+            font-size: 15px;
+            color: var(--color-text-secondary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
+            transition: all var(--duration-normal) var(--easing-smooth);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity var(--duration-normal) var(--easing-smooth);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--color-accent-light);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.02));
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--color-accent-light);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: var(--spacing-md);
+            transition: all var(--duration-normal) var(--easing-smooth);
+        }
+
+        .stat-card:hover .stat-icon {
+            transform: scale(1.15) rotate(5deg);
+            background: var(--color-accent);
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--color-text-primary);
+            margin-bottom: 4px;
+            letter-spacing: -1px;
+        }
+
+        .stat-currency {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin-right: 4px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            font-weight: 600;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+
+            .main {
+                margin-left: 240px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .header {
+                padding: 0 var(--spacing-md);
+            }
+
+            .content {
+                padding: var(--spacing-md);
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content__title {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                height: 60px;
+                padding: 0 var(--spacing-sm);
+            }
+
+            .header__title {
+                font-size: 16px;
+            }
+
+            .content {
+                padding: var(--spacing-sm);
+            }
+
+            .stat-card {
+                padding: var(--spacing-md);
+            }
+
+            .stat-value {
+                font-size: 28px;
+            }
+
+            .content__title {
+                font-size: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="layout">
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <h1 class="sidebar-logo">Shopina</h1>
-        <a href="{% url 'dashboard' %}" class="home-button" title="Accueil" aria-label="Aller à l'accueil">🏠</a>
-      </div>
-      
-      <!-- MAIN MENU -->
-      <div class="sidebar-menu">
-        <div class="sidebar-menu-item">
-          <a href="{% url 'home' %}" class="sidebar-menu-button" title="Page d'accueil publique">
-            <span>Accueil public</span>
-          </a>
-          <a href="{% url 'dashboard' %}" class="sidebar-menu-button home" title="Tableau de bord">
-            <span>📊</span>
-            <span>Dashboard</span>
-          </a>
-        </div>
-      </div>
-
-      <div class="sidebar-menu-label">Pages</div>
-      <nav class="sidebar-nav">
-        <a href="{% url 'dashboard' %}" class="nav-item active">
-          <span class="nav-icon">📊</span>
-          <span>Tableau de bord</span>
-        </a>
-        <a href="{% url 'orders-page' %}" class="nav-item">
-          <span class="nav-icon">📦</span>
-          <span>Commandes</span>
-        </a>
-        <a href="{% url 'clients-page' %}" class="nav-item">
-          <span class="nav-icon">👥</span>
-          <span>Clients</span>
-        </a>
-        <a href="{% url 'create-order' %}" class="nav-item">
-          <span class="nav-icon">➕</span>
-          <span>Créer commande</span>
-        </a>
-        <a href="{% url 'create-product' %}" class="nav-item">
-          <span class="nav-icon">🛍️</span>
-          <span>Créer produit</span>
-        </a>
-      </nav>
-    </aside>
-
-    <!-- MAIN -->
-    <div class="main">
-      <!-- TOPBAR -->
-      <div class="topbar">
-        <p class="topbar-title">Tableau de bord</p>
-        <div class="topbar-actions">
-          <button type="button" id="themeToggle" class="theme-toggle" title="Basculer le thème" aria-pressed="false">🌓</button>
-          <div class="profile-section" data-profile-menu>
-            <button class="profile-trigger" type="button" aria-haspopup="menu" aria-expanded="false">
-              <span class="profile-avatar">
-                {% if request.user.avatar %}
-                  <img src="{{ request.user.avatar.url }}" alt="Avatar" />
-                {% else %}
-                  {{ request.user.username|first|upper }}
-                {% endif %}
-              </span>
-              <span class="profile-info">
-                <p class="profile-name">{{ request.user.get_full_name|default:request.user.username }}</p>
-                <p class="profile-role">{% if request.user.is_staff %}Admin{% elif request.user.is_superuser %}Propriétaire{% else %}Utilisateur{% endif %}</p>
-              </span>
-              <span class="profile-chevron" aria-hidden="true">▾</span>
-            </button>
-            <div class="profile-menu" role="menu">
-              <a href="{% url 'profile_dynamic' %}" role="menuitem">👤 Profil</a>
-              <a href="/accounts/password_change/" role="menuitem">⚙️ Paramètres</a>
-              <a href="{% url 'home' %}" role="menuitem">👀 Vue visiteur</a>
-              <a href="{% url 'orders-page' %}" role="menuitem">📦 Commandes</a>
-              <a href="/accounts/logout/" role="menuitem" class="danger">🚪 Déconnexion</a>
+    <div class="dashboard-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar__header">
+                <a href="http://localhost:3000/" class="sidebar__logo">
+                    <span>🛍️</span> Shopina
+                </a>
             </div>
-          </div>
+
+            <nav class="sidebar__nav">
+                <div class="sidebar__nav-section">
+                    <div class="sidebar__nav-items">
+                        <a href="{% url 'dashboard' %}" class="sidebar__nav-item active">
+                            <span class="sidebar__nav-icon">📊</span>
+                            <span>Tableau de bord</span>
+                        </a>
+                        <a href="{% url 'orders-page' %}" class="sidebar__nav-item">
+                            <span class="sidebar__nav-icon">📦</span>
+                            <span>Commandes</span>
+                        </a>
+                        <a href="{% url 'clients-page' %}" class="sidebar__nav-item">
+                            <span class="sidebar__nav-icon">👥</span>
+                            <span>Clients</span>
+                        </a>
+                        <a href="{% url 'my-shop' %}" class="sidebar__nav-item">
+                            <span class="sidebar__nav-icon">🏪</span>
+                            <span>Ma Boutique</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="sidebar__nav-section">
+                    <div class="sidebar__nav-label">Outils</div>
+                    <div class="sidebar__nav-items">
+                        <a href="{% url 'create-order' %}" class="sidebar__nav-item">
+                            <span class="sidebar__nav-icon">➕</span>
+                            <span>Créer commande</span>
+                        </a>
+                        <a href="{% url 'create-product' %}" class="sidebar__nav-item">
+                            <span class="sidebar__nav-icon">🛍️</span>
+                            <span>Créer produit</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <div class="main">
+            <header class="header">
+                <div class="header__left">
+                    <h1 class="header__title">Tableau de bord</h1>
+                </div>
+
+                <div class="header__right">
+                    <button class="theme__toggle" id="themeToggle" title="Changer le thème">🌓</button>
+
+                    <div class="profile-menu">
+                        <button class="profile-trigger" id="profileTrigger">
+                            <div class="profile-avatar">
+                                {% if request.user.avatar %}
+                                    <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}">
+                                {% else %}
+                                    {{ request.user.username|first|upper }}
+                                {% endif %}
+                            </div>
+                            <div class="profile-info">
+                                <div class="profile-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                                <div class="profile-role">
+                                    {% if request.user.is_superuser %}Propriétaire
+                                    {% elif request.user.is_staff %}Admin
+                                    {% else %}Utilisateur{% endif %}
+                                </div>
+                            </div>
+                            <span class="profile-chevron">▾</span>
+                        </button>
+
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <a href="{% url 'profile_dynamic' %}" class="profile-dropdown__item">
+                                <span class="profile-dropdown__icon">👤</span>
+                                <span>Profil</span>
+                            </a>
+                            <a href="/profile-settings/" class="profile-dropdown__item">
+                                <span class="profile-dropdown__icon">⚙️</span>
+                                <span>Paramètres</span>
+                            </a>
+                            <a href="/accounts/logout/" class="profile-dropdown__item danger">
+                                <span class="profile-dropdown__icon">🚪</span>
+                                <span>Déconnexion</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="content">
+                <div class="content__header">
+                    <h2 class="content__title">Bienvenue</h2>
+                    <p class="content__subtitle">Statistiques en temps réel de votre activité commerciale</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-value">{{ stats.orders|default:"0"|floatformat:0 }}</div>
+                        <div class="stat-label">Commandes</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-value">{{ stats.clients|default:"0"|floatformat:0 }}</div>
+                        <div class="stat-label">Clients</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">🛍️</div>
+                        <div class="stat-value">{{ stats.products|default:"0"|floatformat:0 }}</div>
+                        <div class="stat-label">Produits</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-value"><span class="stat-currency">DA</span>{{ stats.revenue|default:"0"|floatformat:2 }}</div>
+                        <div class="stat-label">Revenu</div>
+                    </div>
+                </div>
+            </main>
         </div>
-      </div>
-
-      <!-- CONTENT -->
-      <div class="content">
-        <nav class="breadcrumb" aria-label="Fil d'Ariane">
-          <span class="breadcrumb-current">📊 Tableau de bord</span>
-        </nav>
-
-        {% if messages %}
-        <div class="messages">
-          {% for message in messages %}
-            <div class="message {{ message.tags|default:'info' }}">{{ message }}</div>
-          {% endfor %}
-        </div>
-        {% endif %}
-
-        <div class="page-header">
-          <h1 class="page-title">Tableau de bord</h1>
-          <p class="page-subtitle">Statistiques en temps réel de votre activité</p>
-        </div>
-
-    <section class="dash-grid cards" aria-label="Statistiques principales">
-      <article class="dash-card" data-detail="orders">
-        <div class="dash-icon">📦</div>
-        <h3>{{ stats.orders|default:0 }}</h3>
-        <p>Commandes</p>
-      </article>
-      <article class="dash-card" data-detail="clients">
-        <div class="dash-icon">👥</div>
-        <h3>{{ stats.clients|default:0 }}</h3>
-        <p>Clients</p>
-      </article>
-      <article class="dash-card" data-detail="products">
-        <div class="dash-icon">🛒</div>
-        <h3>{{ stats.products|default:0 }}</h3>
-        <p>Produits</p>
-      </article>
-      <article class="dash-card" data-detail="revenue">
-        <div class="dash-icon">💰</div>
-        <h3>{{ stats.revenue|default:0|floatformat:0 }} DA</h3>
-        <p>Revenu total</p>
-      </article>
-    </section>
-
-    <section class="dash-grid split" style="margin-top: 20px;">
-      <div class="dash-chart">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-          <h4 style="margin:0; font-size:15px;">Courbe des ventes (7 jours)</h4>
-          <span style="color:var(--muted);font-size:12px;">MàJ temps réel</span>
-        </div>
-        <canvas id="revenueChart" height="240" aria-label="Graphique des ventes" role="img"></canvas>
-      </div>
-      <div class="dash-panel">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-          <h4 style="margin:0; font-size:15px;">Commandes récentes</h4>
-          <span style="color:var(--muted);font-size:12px;">Top 5</span>
-        </div>
-        <ul class="dash-list" aria-label="Dernières commandes">
-          {% for order in recent_orders %}
-            <li>
-              <div>
-                <div style="font-weight:700; font-size:13px;">Commande #{{ order.id }}</div>
-                <div style="color:var(--muted); font-size:11px;">{{ order.customer }}</div>
-              </div>
-              <div style="text-align:right;">
-                <div style="font-weight:800; font-size:13px;">{{ order.total|floatformat:0 }} DA</div>
-                {% with status=order.status|lower %}
-                  <span class="dash-chip {% if status == 'completed' %}success{% elif status == 'processing' %}warning{% else %}danger{% endif %}">{{ order.status|title }}</span>
-                {% endwith %}
-              </div>
-            </li>
-          {% empty %}
-            <li style="justify-content:center; color:var(--muted);">Aucune commande pour l'instant.</li>
-          {% endfor %}
-        </ul>
-      </div>
-    </section>
-
-    <section style="margin-top: 20px;">
-      <h4 style="margin:0 0 12px; font-size:15px;">Actions rapides</h4>
-      <div class="dash-quick" id="quick-actions">
-        <a href="{% url 'create-order' %}" class="dash-quick-link" style="text-decoration:none;">
-          <div class="dash-quick-link-inner" role="button" aria-label="Créer une commande">
-            ➕ Créer commande
-          </div>
-        </a>
-        <a href="{% url 'create-product' %}" class="dash-quick-link" style="text-decoration:none;">
-          <div class="dash-quick-link-inner" role="button" aria-label="Créer un produit">
-            🛍️ Créer produit
-          </div>
-        </a>
-        <form method="post">
-          {% csrf_token %}
-          <input type="hidden" name="action" value="refresh" />
-          <button type="submit" style="width:100%; border:1px solid var(--border); background:var(--card); color:var(--text); padding:12px 14px; border-radius:10px; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; transition:var(--transition);">🔄 Rafraîchir</button>
-        </form>
-        <a href="{% url 'orders-page' %}" class="dash-quick-link" style="text-decoration:none;">
-          <div class="dash-quick-link-inner" role="button" aria-label="Voir les commandes">
-            📄 Commandes
-          </div>
-        </a>
-      </div>
-    </section>
-      </div>
     </div>
-  </div>
 
-  {{ chart|json_script:"chart-data" }}
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" integrity="sha256-Yn1mpd1FZjU2HtO6HddmYXMOyxFmJ/3GofvBy06SnVA=" crossorigin="anonymous"></script>
-  <script>
-    // Theme: persist + toggle
-    const applyTheme = (theme) => {
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('theme', theme);
-    };
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    applyTheme(savedTheme);
-    
-    document.getElementById('themeToggle')?.addEventListener('click', (e) => {
-      const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-      const next = current === 'light' ? 'dark' : 'light';
-      applyTheme(next);
-      e.currentTarget.setAttribute('aria-pressed', String(next === 'light'));
-    });
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        
+        html.setAttribute('data-theme', currentTheme);
 
-    // Set active nav item
-    const currentPath = window.location.pathname;
-    document.querySelectorAll('.nav-item').forEach(item => {
-      item.classList.remove('active');
-      if (item.getAttribute('href') === currentPath) {
-        item.classList.add('active');
-      }
-    });
-
-    // Chart
-    const chartPayload = JSON.parse(document.getElementById('chart-data').textContent);
-    const ctx = document.getElementById('revenueChart');
-    let revenueChart;
-    if (ctx && window.Chart) {
-      const isDarkMode = document.documentElement.getAttribute('data-theme') !== 'light';
-      const gridColor = isDarkMode ? 'rgba(148,163,184,0.12)' : 'rgba(100,150,220,0.1)';
-      const tickColor = isDarkMode ? '#cbd5e1' : '#334155';
-      
-      revenueChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: chartPayload.labels,
-          datasets: [{
-            label: 'Revenu (DA)',
-            data: chartPayload.values,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            tension: 0.4,
-            fill: true,
-            pointRadius: 5,
-            pointHoverRadius: 7,
-            pointBackgroundColor: '#3b82f6',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            borderWidth: 2.5,
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: 'rgba(15, 23, 42, 0.8)',
-              titleColor: '#e2e8f0',
-              bodyColor: '#cbd5e1',
-              borderColor: '#3b82f6',
-              borderWidth: 1,
-              padding: 10,
-              titleFont: { size: 12, weight: 'bold' },
-              bodyFont: { size: 12 },
-            }
-          },
-          scales: {
-            x: {
-              grid: { color: gridColor, drawBorder: false },
-              ticks: { color: tickColor, font: { size: 11 } }
-            },
-            y: {
-              grid: { color: gridColor, drawBorder: false },
-              ticks: { color: tickColor, font: { size: 11 } }
-            }
-          },
-          animation: { duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 600 }
-        }
-      });
-    }
-
-    // Quick action forms
-    document.querySelectorAll('#quick-actions form').forEach(form => {
-      form.addEventListener('click', (event) => {
-        event.preventDefault();
-        form.submit();
-      });
-    });
-
-    // Profile dropdown menu
-    (function() {
-      const containers = document.querySelectorAll('[data-profile-menu]');
-      containers.forEach((container) => {
-        const trigger = container.querySelector('.profile-trigger');
-        const menu = container.querySelector('.profile-menu');
-        if (!trigger || !menu) return;
-        const items = Array.from(menu.querySelectorAll('[role="menuitem"]'));
-
-        const close = () => {
-          menu.classList.remove('open');
-          trigger.setAttribute('aria-expanded', 'false');
-        };
-        const open = () => {
-          menu.classList.add('open');
-          trigger.setAttribute('aria-expanded', 'true');
-        };
-        const toggle = () => menu.classList.contains('open') ? close() : open();
-
-        trigger.addEventListener('click', (e) => {
-          e.stopPropagation();
-          toggle();
-          if (menu.classList.contains('open') && items.length) items[0].focus();
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
         });
 
-        trigger.addEventListener('keydown', (e) => {
-          if (['Enter',' ', 'ArrowDown'].includes(e.key)) {
-            e.preventDefault();
-            open();
-            if (items.length) items[0].focus();
-          }
-        });
+        const profileTrigger = document.getElementById('profileTrigger');
+        const profileDropdown = document.getElementById('profileDropdown');
 
-        menu.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape') { close(); trigger.focus(); }
-          if (['ArrowDown','ArrowUp'].includes(e.key)) {
-            e.preventDefault();
-            const current = items.indexOf(document.activeElement);
-            const dir = e.key === 'ArrowDown' ? 1 : -1;
-            const next = (current + dir + items.length) % items.length;
-            items[next]?.focus();
-          }
+        profileTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('active');
         });
 
         document.addEventListener('click', (e) => {
-          if (!container.contains(e.target)) close();
+            if (!profileDropdown.contains(e.target) && e.target !== profileTrigger) {
+                profileDropdown.classList.remove('active');
+            }
         });
-      });
-    })();
-  </script>
-  {% include 'partials/cookie_banner.html' %}
+
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        document.querySelectorAll('.sidebar__nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                }
+            });
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            const element = e.target;
+            if (element.classList.contains('sidebar__nav-item') || 
+                element.classList.contains('profile-trigger') ||
+                element.classList.contains('profile-dropdown__item') ||
+                element.classList.contains('stat-card')) {
+                document.body.classList.add('cursor-hover');
+            } else {
+                document.body.classList.remove('cursor-hover');
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            }
+        });
+    </script>
+
+    {% include 'partials/cookie_banner.html' %}
 </body>
 </html>

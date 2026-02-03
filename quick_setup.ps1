@@ -75,13 +75,9 @@ Write-Ok "Frontend deps installed"
 
 # 4) Launch servers in separate windows
 Write-Info "Starting backend server (new window)"
-Start-Process -FilePath "powershell" -WorkingDirectory $backend -ArgumentList (
-    "-NoExit -Command `"& `"""$pyExe""" manage.py runserver`""
-)
+Start-Process -FilePath "powershell" -WorkingDirectory $backend -ArgumentList @("-NoExit", "-Command", "& `"$pyExe`" manage.py runserver")
 
 Write-Info "Starting frontend dev server (new window)"
-Start-Process -FilePath "powershell" -WorkingDirectory $frontend -ArgumentList (
-    "-NoExit -Command `"npm run dev`""
-)
+Start-Process -FilePath "powershell" -WorkingDirectory $frontend -ArgumentList @("-NoExit", "-Command", "npm run dev")
 
 Write-Ok "All set! Backend at http://127.0.0.1:8000, Frontend at http://localhost:3000"

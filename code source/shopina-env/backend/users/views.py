@@ -4,13 +4,16 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
-from core.permissions.custom_permissions import IsAdmin, IsOwnerOrAdmin
+from django.db.models import Count, DecimalField, Q, Sum, Value
+from django.db.models.functions import Coalesce
+from core.permissions.custom_permissions import IsAdmin, IsOwnerOrAdmin, IsSeller
 from core.utils.exceptions import ValidationError as CustomValidationError
 from users.services.user_service import UserService
 from .serializers import (
     UserSerializer, 
     UserDetailSerializer,
     UserUpdateSerializer,
+    CustomerListSerializer,
     RegisterSerializer, 
     EmailOrUsernameTokenObtainSerializer,
     PasswordResetRequestSerializer,
@@ -284,6 +287,35 @@ class UserStatisticsView(APIView):
         """Get user statistics."""
         stats = self.user_service.get_user_statistics()
         return Response(stats, status=status.HTTP_200_OK)
+
+
+class CustomerListView(generics.ListAPIView):
+    """Expose customer data with aggregated order stats for the dashboard."""
+
+    serializer_class = CustomerListSerializer
+    permission_classes = [permissions.IsAuthenticated, IsSeller]
+
+    def get_queryset(self):
+        queryset = User.objects.filter(role='CUSTOMER')
+        search = (self.request.query_params.get('search') or '').strip()
+        if search:
+            queryset = queryset.filter(
+                Q(username__icontains=search)
+                | Q(email__icontains=search)
+                | Q(first_name__icontains=search)
+                | Q(last_name__icontains=search)
+            )
+        return (
+            queryset
+            .annotate(
+                total_orders=Count('orders', distinct=True),
+                total_spent=Coalesce(
+                    Sum('orders__total'),
+                    Value(0, output_field=DecimalField(max_digits=12, decimal_places=2))
+                ),
+            )
+            .order_by('-date_joined')
+        )
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

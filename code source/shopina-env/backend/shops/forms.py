@@ -50,14 +50,14 @@ class ShopCreationForm(forms.ModelForm):
     
     def clean_description(self):
         """Validate shop description."""
-        description = self.cleaned_data.get('description', '').strip()
+        description = (self.cleaned_data.get('description') or '').strip()
         if description and len(description) < 10:
             raise forms.ValidationError('La description doit contenir au moins 10 caractères.')
         return description
     
     def clean_email(self):
         """Validate email."""
-        email = self.cleaned_data.get('email', '').strip()
+        email = (self.cleaned_data.get('email') or '').strip()
         if email and '@' not in email:
             raise forms.ValidationError('Veuillez entrer une adresse e-mail valide.')
         return email

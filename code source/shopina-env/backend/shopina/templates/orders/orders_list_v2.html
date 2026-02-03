@@ -1,0 +1,683 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commandes | Shopina</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Colors - Dark Theme */
+            --color-bg-primary: #0f1419;
+            --color-bg-secondary: #1a1f2e;
+            --color-bg-tertiary: #252d3d;
+            --color-bg-hover: rgba(255, 255, 255, 0.03);
+            
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #b0b8c8;
+            --color-text-muted: #8490a0;
+            
+            --color-accent: #3b82f6;
+            --color-accent-light: rgba(59, 130, 246, 0.12);
+            --color-accent-dark: #2563eb;
+            
+            --color-border: rgba(148, 163, 184, 0.08);
+            --color-border-light: rgba(148, 163, 184, 0.15);
+            
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.18);
+            --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.25);
+            
+            /* Radius */
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            
+            /* Transitions */
+            --duration-fast: 150ms;
+            --duration-normal: 300ms;
+            --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="light"] {
+            --color-bg-primary: #f8f9fc;
+            --color-bg-secondary: #ffffff;
+            --color-bg-tertiary: #f1f3f8;
+            
+            --color-text-primary: #0f172a;
+            --color-text-secondary: #475569;
+            --color-text-muted: #64748b;
+            
+            --color-border: rgba(15, 23, 42, 0.06);
+            --color-border-light: rgba(15, 23, 42, 0.1);
+            
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.1);
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* LAYOUT */
+        .orders-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--color-bg-secondary);
+            border-right: 1px solid var(--color-border);
+            padding: var(--spacing-lg);
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--color-accent);
+            border-radius: 2px;
+        }
+
+        .sidebar__logo {
+            font-size: 24px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--color-accent), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: var(--spacing-lg);
+            text-decoration: none;
+            cursor: pointer;
+            display: block;
+        }
+
+        .sidebar__nav {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .sidebar__nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: 12px var(--spacing-md);
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            transition: all var(--duration-fast) var(--easing-smooth);
+            cursor: pointer;
+        }
+
+        .sidebar__nav-item:hover {
+            background: var(--color-bg-hover);
+            color: var(--color-accent);
+            transform: translateX(4px);
+        }
+
+        .sidebar__nav-item.active {
+            background: var(--color-accent-light);
+            color: var(--color-accent);
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            margin-left: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        .header {
+            height: 70px;
+            background: var(--color-bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 var(--spacing-xl);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            gap: var(--spacing-lg);
+        }
+
+        .header__left {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .header__title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .header__right {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-left: auto;
+        }
+
+        /* THEME TOGGLE */
+        .theme__toggle {
+            width: 40px;
+            height: 40px;
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text-primary);
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--duration-fast) var(--easing-smooth);
+        }
+
+        .theme__toggle:hover {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            transform: rotate(15deg);
+        }
+
+        /* PROFILE MENU */
+        .profile-menu {
+            position: relative;
+        }
+
+        .profile-trigger {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: 6px 12px;
+            background: var(--color-bg-tertiary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--easing-smooth);
+            color: var(--color-text-primary);
+        }
+
+        .profile-trigger:hover {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            transform: translateY(-2px);
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-accent), #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            line-height: 1.2;
+        }
+
+        .profile-name {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .profile-role {
+            font-size: 11px;
+            color: var(--color-text-muted);
+        }
+
+        /* PROFILE DROPDOWN */
+        .profile-dropdown {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            min-width: 240px;
+            background: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px) scale(0.95);
+            transition: all var(--duration-normal) cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 1001;
+        }
+
+        .profile-dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        .profile-dropdown__item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            color: var(--color-text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--easing-smooth);
+        }
+
+        .profile-dropdown__item:hover {
+            background: var(--color-accent-light);
+            color: var(--color-accent);
+        }
+
+        .profile-dropdown__item.danger {
+            color: var(--color-danger);
+        }
+
+        .profile-dropdown__item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* CONTENT */
+        .content {
+            flex: 1;
+            padding: var(--spacing-xl);
+            overflow-y: auto;
+        }
+
+        .content__header {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .content__title {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .content__subtitle {
+            font-size: 15px;
+            color: var(--color-text-secondary);
+        }
+
+        /* TABLE */
+        .table-container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--color-border-light);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table thead {
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        .table th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--color-text-primary);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--color-border);
+            font-size: 14px;
+        }
+
+        .table tbody tr:hover {
+            background: var(--color-bg-hover);
+        }
+
+        /* STATUS CHIPS */
+        .status-chip {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-chip.completed {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .status-chip.processing {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--color-accent);
+        }
+
+        .status-chip.pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+
+        .status-chip.cancelled {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--color-danger);
+        }
+
+        /* ACTION BUTTONS */
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+            background: transparent;
+            color: var(--color-text-primary);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all var(--duration-fast) var(--easing-smooth);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: var(--color-accent-light);
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn.primary {
+            background: var(--color-accent);
+            border-color: var(--color-accent);
+            color: white;
+        }
+
+        .btn.primary:hover {
+            background: var(--color-accent-dark);
+            border-color: var(--color-accent-dark);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn.danger {
+            color: var(--color-danger);
+        }
+
+        .btn.danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--color-danger);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+
+            .main {
+                margin-left: 240px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .header {
+                padding: 0 var(--spacing-md);
+            }
+
+            .content {
+                padding: var(--spacing-md);
+            }
+
+            .content__title {
+                font-size: 24px;
+            }
+
+            .table {
+                font-size: 12px;
+            }
+
+            .table th, .table td {
+                padding: 10px;
+            }
+
+            .action-buttons {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="orders-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <a href="http://localhost:3000/" class="sidebar__logo">
+                🛍️ Shopina
+            </a>
+
+            <nav class="sidebar__nav">
+                <a href="{% url 'dashboard' %}" class="sidebar__nav-item">
+                    <span>📊</span> Tableau de bord
+                </a>
+                <a href="{% url 'orders-page' %}" class="sidebar__nav-item active">
+                    <span>📦</span> Commandes
+                </a>
+                <a href="{% url 'clients-page' %}" class="sidebar__nav-item">
+                    <span>👥</span> Clients
+                </a>
+            </nav>
+        </aside>
+
+        <!-- MAIN -->
+        <div class="main">
+            <!-- HEADER -->
+            <header class="header">
+                <div class="header__left">
+                    <h1 class="header__title">Commandes</h1>
+                </div>
+
+                <div class="header__right">
+                    <button class="theme__toggle" id="themeToggle">🌓</button>
+
+                    <div class="profile-menu">
+                        <button class="profile-trigger" id="profileTrigger">
+                            <div class="profile-avatar">
+                                {% if request.user.avatar %}
+                                    <img src="{{ request.user.avatar.url }}" alt="{{ request.user.username }}">
+                                {% else %}
+                                    {{ request.user.username|first|upper }}
+                                {% endif %}
+                            </div>
+                            <div class="profile-info">
+                                <div class="profile-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                                <div class="profile-role">Utilisateur</div>
+                            </div>
+                        </button>
+
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <a href="{% url 'profile_dynamic' %}" class="profile-dropdown__item">
+                                <span>👤</span> Profil
+                            </a>
+                            <a href="/profile-settings/" class="profile-dropdown__item">
+                                <span>⚙️</span> Paramètres
+                            </a>
+                            <a href="/accounts/logout/" class="profile-dropdown__item danger">
+                                <span>🚪</span> Déconnexion
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- CONTENT -->
+            <main class="content">
+                <div class="content__header">
+                    <h2 class="content__title">Gestion des commandes</h2>
+                    <p class="content__subtitle">Suivez et gérez toutes vos commandes en un seul endroit</p>
+                </div>
+
+                {% if orders %}
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Commande #</th>
+                                <th>Client</th>
+                                <th>Montant</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td><strong>#{{ order.id }}</strong></td>
+                                <td>{{ order.customer.get_full_name|default:order.customer.username }}</td>
+                                <td><strong>{{ order.total_amount }} DA</strong></td>
+                                <td>
+                                    <span class="status-chip {% if order.status == 'completed' %}completed{% elif order.status == 'processing' %}processing{% elif order.status == 'pending' %}pending{% elif order.status == 'cancelled' %}cancelled{% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ order.created_at|date:"d/m/Y" }}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="{% url 'order-detail' order.id %}" class="btn primary">Voir</a>
+                                        <a href="{% url 'edit-order' order.id %}" class="btn">Éditer</a>
+                                        <a href="{% url 'delete-order' order.id %}" class="btn danger" onclick="return confirm('Êtes-vous sûr?')">Supprimer</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="table-container" style="padding: 60px 20px; text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">📭</div>
+                    <h3 style="margin-bottom: 8px;">Aucune commande</h3>
+                    <p style="color: var(--color-text-secondary); margin-bottom: 20px;">Vous n'avez pas encore de commandes</p>
+                    <a href="{% url 'create-order' %}" class="btn primary">Créer une commande</a>
+                </div>
+                {% endif %}
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Theme Management
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        
+        html.setAttribute('data-theme', currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Profile Dropdown
+        const profileTrigger = document.getElementById('profileTrigger');
+        const profileDropdown = document.getElementById('profileDropdown');
+
+        profileTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!profileDropdown.contains(e.target) && e.target !== profileTrigger) {
+                profileDropdown.classList.remove('active');
+            }
+        });
+
+        // Add active state to current nav item
+        document.querySelectorAll('.sidebar__nav-item').forEach(item => {
+            if (item.href === window.location.href) {
+                item.classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>

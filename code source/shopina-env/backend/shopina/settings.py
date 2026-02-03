@@ -213,7 +213,7 @@ SOCIALACCOUNT_EMAIL_VERIFICATION = 'optional'
 SOCIALACCOUNT_LOGIN_ON_GET = True  # Allow login via GET request
 
 # Frontend URL for redirects (OAuth, password reset, etc.)
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3005')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 LOGIN_REDIRECT_URL = f"{FRONTEND_URL}/dashboard"  # Redirect to frontend after OAuth
 ACCOUNT_LOGOUT_REDIRECT_URL = f"{FRONTEND_URL}/login"
 

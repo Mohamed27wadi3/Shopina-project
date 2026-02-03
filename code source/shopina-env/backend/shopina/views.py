@@ -27,8 +27,8 @@ class FrontendIndexView(View):
     """
     def get(self, request: HttpRequest) -> HttpResponse:
         if settings.DEBUG:
-            # In development, redirect to Vite dev server
-            return redirect('http://localhost:3003')
+            # In development, redirect to configured frontend URL
+            return redirect(settings.FRONTEND_URL)
         else:
             # In production, serve built index.html
             # You would configure Django to serve static files from frontend/build
@@ -305,12 +305,26 @@ class ClientsListPageView(View):
                 "phone": getattr(u, "phone_number", None),
             })
 
+        total_clients = users_qs.count()
+        active_clients = users_qs.filter(is_active=True).count()
+        activity_rate = round((active_clients / total_clients * 100)) if total_clients > 0 else 0
+        
         context = {
             "clients": clients,
             "query": q,
             "stats": {
-                "total": users_qs.count(),
-                "active": users_qs.filter(is_active=True).count(),
+                "total": total_clients,
+                "active": active_clients,
+                "activity_rate": activity_rate,
             },
         }
         return render(request, self.template_name, context)
+
+
+class ProfileDynamicView(LoginRequiredMixin, View):
+    """Dynamic profile page with 3D animations and interactive features."""
+    template_name = "profile_dynamic.html"
+    login_url = '/accounts/login/'
+    
+    def get(self, request: HttpRequest) -> HttpResponse:
+        return render(request, self.template_name, {'user': request.user})

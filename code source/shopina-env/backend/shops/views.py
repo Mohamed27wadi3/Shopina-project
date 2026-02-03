@@ -10,7 +10,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 from .models import ShopTheme
+from shop.serializers import ProductSerializer
 
 from .models import Shop
 from .forms import ShopCreationForm, ShopUpdateForm
@@ -29,7 +31,7 @@ class MyShopRedirectView(LoginRequiredMixin, View):
             shop = request.user.shop
             # User has a shop, redirect to dashboard
             return redirect('shop:dashboard', slug=shop.slug)
-        except Shop.DoesNotExist:
+        except (Shop.DoesNotExist, AttributeError):
             # User doesn't have a shop, redirect to create
             return redirect('shop:create')
 
@@ -42,8 +44,11 @@ class CreateShopView(LoginRequiredMixin, CreateView):
     model = Shop
     form_class = ShopCreationForm
     template_name = 'shops/create_shop.html'
-    success_url = reverse_lazy('shop:dashboard')
     login_url = reverse_lazy('login')
+    
+    def get_success_url(self):
+        # Return dashboard URL with the shop slug
+        return reverse_lazy('shop:dashboard', kwargs={'slug': self.object.slug})
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -66,7 +71,7 @@ class CreateShopView(LoginRequiredMixin, CreateView):
         shop.save()
         
         messages.success(self.request, f'✅ Boutique "{shop.name}" créée avec succès!')
-        return redirect(self.get_success_url())
+        return super().form_valid(form)
     
     def form_invalid(self, form):
         messages.error(self.request, 'Erreur lors de la création de la boutique.')
@@ -83,21 +88,28 @@ class ShopDashboardView(LoginRequiredMixin, View):
     def get(self, request, slug=None):
         try:
             # Get the user's shop
+            if not hasattr(request.user, 'shop'):
+                messages.info(request, '🏪 Vous devez d\'abord créer une boutique.')
+                return redirect('shop:create')
+                
             shop = request.user.shop
             
             # Verify the slug matches (security check)
             if slug and shop.slug != slug:
                 messages.error(request, 'Accès refusé.')
-                return redirect('shop:my-shop')
+                return redirect('shop:dashboard', slug=shop.slug)
             
             context = {
                 'shop': shop,
                 'page_title': f'Tableau de bord - {shop.name}',
             }
             return render(request, self.template_name, context)
-        except Shop.DoesNotExist:
-            messages.info(request, 'Vous devez d\'abord créer une boutique.')
+        except (Shop.DoesNotExist, AttributeError) as e:
+            messages.info(request, '🏪 Vous devez d\'abord créer une boutique.')
             return redirect('shop:create')
+        except Exception as e:
+            messages.error(request, f'Erreur: {str(e)}')
+            return redirect('dashboard')
 
 
 class UpdateShopView(LoginRequiredMixin, View):
@@ -154,6 +166,15 @@ def get_my_shop(request):
     """
     try:
         shop = request.user.shop
+        theme = getattr(shop, 'theme', None)
+        theme_payload = None
+        if theme:
+            theme_payload = {
+                'template_id': theme.template_id,
+                'options': theme.options,
+                'updated_at': theme.updated_at.isoformat(),
+            }
+
         return Response({
             'id': shop.id,
             'name': shop.name,
@@ -161,6 +182,7 @@ def get_my_shop(request):
             'description': shop.description,
             'email': shop.email,
             'phone': shop.phone,
+            'status': shop.status,
             'is_active': shop.is_active,
             'is_verified': shop.is_verified,
             'total_products': shop.total_products,
@@ -168,6 +190,12 @@ def get_my_shop(request):
             'total_sales': float(shop.total_sales),
             'average_rating': shop.average_rating,
             'created_at': shop.created_at.isoformat(),
+            'theme': theme_payload,
+            'owner': {
+                'id': request.user.id,
+                'username': request.user.username,
+                'email': request.user.email,
+            },
         })
     except Shop.DoesNotExist:
         return Response(
@@ -192,37 +220,125 @@ def create_shop_api(request):
     if form.is_valid():
         shop = form.save(commit=False)
         shop.owner = request.user
+        shop.status = 'draft'
         shop.save()
         return Response({
             'id': shop.id,
             'name': shop.name,
             'slug': shop.slug,
+            'status': shop.status,
             'message': 'Shop created successfully!'
         }, status=status.HTTP_201_CREATED)
     
     return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
+@api_view(['GET'])
+def public_shop(request, slug):
+    """
+    Public, read-only shop view by slug.
+    - Returns only active shops
+    - No owner-identifying data leaked
+    """
+    try:
+        shop = Shop.objects.get(slug=slug, is_active=True)
+    except Shop.DoesNotExist:
+        return Response({'detail': 'Shop not found or inactive.'}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response({
+        'id': shop.id,
+        'name': shop.name,
+        'slug': shop.slug,
+        'description': shop.description,
+        'email': shop.email,
+        'phone': shop.phone,
+        'logo': shop.logo.url if shop.logo else None,
+        'banner': shop.banner.url if shop.banner else None,
+        'is_active': shop.is_active,
+        'total_products': shop.total_products,
+        'total_orders': shop.total_orders,
+        'total_sales': float(shop.total_sales),
+        'average_rating': shop.average_rating,
+        'created_at': shop.created_at.isoformat(),
+    })
+
+
+@api_view(['GET'])
+def public_shop_products(request, slug):
+    """Return public product list for a shop identified by slug."""
+    try:
+        shop = Shop.objects.get(slug=slug, is_active=True)
+    except Shop.DoesNotExist:
+        return Response({'detail': 'Shop not found or inactive.'}, status=status.HTTP_404_NOT_FOUND)
+
+    products = shop.products.all()
+    serializer = ProductSerializer(products, many=True, context={'request': request})
+    return Response(serializer.data)
+
+
+def _deep_merge_dicts(base, updates):
+    for key, value in updates.items():
+        if isinstance(value, dict) and isinstance(base.get(key), dict):
+            base[key] = _deep_merge_dicts(base.get(key, {}), value)
+        else:
+            base[key] = value
+    return base
+
+
+@api_view(['GET', 'POST', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def save_theme(request):
-    """Save active template and customization options for the authenticated user's shop."""
+    """Get or save active template and customization options for the authenticated user's shop."""
     try:
         shop = request.user.shop
     except Shop.DoesNotExist:
         return Response({'detail': 'You do not have a shop yet.'}, status=status.HTTP_404_NOT_FOUND)
 
+    if request.method == 'GET':
+        try:
+            theme = shop.theme
+        except ShopTheme.DoesNotExist:
+            return Response({'detail': 'No theme saved yet.'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({
+            'template_id': theme.template_id,
+            'options': theme.options,
+            'updated_at': theme.updated_at.isoformat(),
+        })
+
     template_id = request.data.get('template_id')
     options = request.data.get('options') or {}
-    if not template_id:
+    merge = request.data.get('merge', True)
+
+    theme = ShopTheme.objects.filter(shop=shop).first()
+    if not theme and not template_id:
+        return Response({'detail': 'template_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    current_options = theme.options if theme else {}
+    if merge:
+        merged_options = _deep_merge_dicts(dict(current_options), dict(options))
+    else:
+        merged_options = dict(options)
+
+    current_version = int(current_options.get('version', 0))
+    merged_options['version'] = current_version + 1
+    merged_options['updated_at'] = timezone.now().isoformat()
+
+    final_template_id = str(template_id or (theme.template_id if theme else ''))
+    if not final_template_id:
         return Response({'detail': 'template_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
     theme, _ = ShopTheme.objects.update_or_create(
         shop=shop,
         defaults={
-            'template_id': int(template_id),
-            'options': options,
+            'template_id': final_template_id,
+            'options': merged_options,
             'is_active': True,
         }
     )
-    return Response({'message': 'Theme saved', 'template_id': theme.template_id, 'options': theme.options})
+    return Response({
+        'message': 'Theme saved',
+        'template_id': theme.template_id,
+        'options': theme.options,
+        'updated_at': theme.updated_at.isoformat(),
+    })

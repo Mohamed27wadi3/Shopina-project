@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h1>Importer des commandes</h1>
+    <p>Uploader un fichier CSV pour importer des commandes en masse (placeholder).</p>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="file" name="file" />
+      <button type="submit">Uploader</button>
+    </form>
+  </div>
+{% endblock %}

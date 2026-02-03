@@ -32,6 +32,11 @@ class Shop(models.Model):
     country = models.CharField(max_length=100, blank=True, null=True)
     
     # Shop status
+    status = models.CharField(
+        max_length=20,
+        default='draft',
+        choices=[('draft', 'Draft'), ('active', 'Active')],
+    )
     is_active = models.BooleanField(default=True)
     is_verified = models.BooleanField(default=False)
     
@@ -97,7 +102,7 @@ class Shop(models.Model):
 class ShopTheme(models.Model):
     """Active template and customization options per shop."""
     shop = models.OneToOneField(Shop, on_delete=models.CASCADE, related_name='theme')
-    template_id = models.PositiveIntegerField()
+    template_id = models.CharField(max_length=100)
     options = JSONField(default=dict)
     is_active = models.BooleanField(default=True)
     updated_at = models.DateTimeField(auto_now=True)
