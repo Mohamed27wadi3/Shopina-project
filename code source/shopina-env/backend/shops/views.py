@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 from .models import ShopTheme
 from shop.serializers import ProductSerializer
 
@@ -165,6 +166,15 @@ def get_my_shop(request):
     """
     try:
         shop = request.user.shop
+        theme = getattr(shop, 'theme', None)
+        theme_payload = None
+        if theme:
+            theme_payload = {
+                'template_id': theme.template_id,
+                'options': theme.options,
+                'updated_at': theme.updated_at.isoformat(),
+            }
+
         return Response({
             'id': shop.id,
             'name': shop.name,
@@ -172,6 +182,7 @@ def get_my_shop(request):
             'description': shop.description,
             'email': shop.email,
             'phone': shop.phone,
+            'status': shop.status,
             'is_active': shop.is_active,
             'is_verified': shop.is_verified,
             'total_products': shop.total_products,
@@ -179,6 +190,7 @@ def get_my_shop(request):
             'total_sales': float(shop.total_sales),
             'average_rating': shop.average_rating,
             'created_at': shop.created_at.isoformat(),
+            'theme': theme_payload,
             'owner': {
                 'id': request.user.id,
                 'username': request.user.username,
@@ -208,11 +220,13 @@ def create_shop_api(request):
     if form.is_valid():
         shop = form.save(commit=False)
         shop.owner = request.user
+        shop.status = 'draft'
         shop.save()
         return Response({
             'id': shop.id,
             'name': shop.name,
             'slug': shop.slug,
+            'status': shop.status,
             'message': 'Shop created successfully!'
         }, status=status.HTTP_201_CREATED)
     
@@ -262,26 +276,69 @@ def public_shop_products(request, slug):
     return Response(serializer.data)
 
 
-@api_view(['POST'])
+def _deep_merge_dicts(base, updates):
+    for key, value in updates.items():
+        if isinstance(value, dict) and isinstance(base.get(key), dict):
+            base[key] = _deep_merge_dicts(base.get(key, {}), value)
+        else:
+            base[key] = value
+    return base
+
+
+@api_view(['GET', 'POST', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def save_theme(request):
-    """Save active template and customization options for the authenticated user's shop."""
+    """Get or save active template and customization options for the authenticated user's shop."""
     try:
         shop = request.user.shop
     except Shop.DoesNotExist:
         return Response({'detail': 'You do not have a shop yet.'}, status=status.HTTP_404_NOT_FOUND)
 
+    if request.method == 'GET':
+        try:
+            theme = shop.theme
+        except ShopTheme.DoesNotExist:
+            return Response({'detail': 'No theme saved yet.'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({
+            'template_id': theme.template_id,
+            'options': theme.options,
+            'updated_at': theme.updated_at.isoformat(),
+        })
+
     template_id = request.data.get('template_id')
     options = request.data.get('options') or {}
-    if not template_id:
+    merge = request.data.get('merge', True)
+
+    theme = ShopTheme.objects.filter(shop=shop).first()
+    if not theme and not template_id:
+        return Response({'detail': 'template_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    current_options = theme.options if theme else {}
+    if merge:
+        merged_options = _deep_merge_dicts(dict(current_options), dict(options))
+    else:
+        merged_options = dict(options)
+
+    current_version = int(current_options.get('version', 0))
+    merged_options['version'] = current_version + 1
+    merged_options['updated_at'] = timezone.now().isoformat()
+
+    final_template_id = str(template_id or (theme.template_id if theme else ''))
+    if not final_template_id:
         return Response({'detail': 'template_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
     theme, _ = ShopTheme.objects.update_or_create(
         shop=shop,
         defaults={
-            'template_id': int(template_id),
-            'options': options,
+            'template_id': final_template_id,
+            'options': merged_options,
             'is_active': True,
         }
     )
-    return Response({'message': 'Theme saved', 'template_id': theme.template_id, 'options': theme.options})
+    return Response({
+        'message': 'Theme saved',
+        'template_id': theme.template_id,
+        'options': theme.options,
+        'updated_at': theme.updated_at.isoformat(),
+    })
