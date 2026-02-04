@@ -1,3 +1,8 @@
+# PATTERN MVC: MODEL (M)
+# ========================
+# Les Users models représentent la structure des utilisateurs en BDD
+# Voir shop/models.py pour la documentation complète du pattern MVC
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
@@ -5,10 +10,12 @@ from datetime import timedelta
 import secrets
 
 
+# M - MODEL: Classe qui représente les utilisateurs (TABLE 'auth_user' étendue)
 class User(AbstractUser):
     """
     Custom User model with extended fields for e-commerce platform.
     Supports three roles: Admin, Seller, and Customer.
+    Représente la table 'users_user' en base de données.
     """
     
     ROLE_CHOICES = [
@@ -58,8 +65,11 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['email']
 
 
+# M - MODEL: Classe pour l'authentification deux facteurs
 class TwoFactor(models.Model):
-    """Stores OTPs for two-factor authentication (email-based)."""
+    """Stores OTPs for two-factor authentication (email-based).
+    Représente la table 'users_twofactor' en base de données.
+    """
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='two_factors')
     otp_hash = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

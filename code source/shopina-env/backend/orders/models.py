@@ -1,8 +1,17 @@
+# PATTERN MVC: MODEL (M)
+# ========================
+# Les Order models représentent les commandes en base de données
+# Voir shop/models.py pour la documentation complète du pattern MVC
+
 from django.db import models
 from django.conf import settings
 
 
+# M - MODEL: Classe qui représente une COMMANDE (TABLE 'orders_order')
 class Order(models.Model):
+    """Commande d'un utilisateur.
+    Représente la table 'orders_order' en base de données.
+    """
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('processing', 'Processing'),
@@ -19,7 +28,11 @@ class Order(models.Model):
         return f"Order #{self.pk} - {self.user}"
 
 
+# M - MODEL: Classe qui représente les ARTICLES d'une commande (TABLE 'orders_orderitem')
 class OrderItem(models.Model):
+    """Article dans une commande.
+    Représente la table 'orders_orderitem' en base de données.
+    """
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey('shop.Product', on_delete=models.SET_NULL, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)

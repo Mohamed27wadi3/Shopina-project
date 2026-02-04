@@ -1,5 +1,17 @@
 """
 Cart repository for data access operations.
+
+PRINCIPES SOLID: O + L (voir BaseRepository pour S)
+===================================================
+
+O - OPEN/CLOSED:
+- CartRepository HÉRITE de BaseRepository
+- Ajoute get_or_create_cart(), get_user_cart(), clear_cart()
+- Ne touche PAS à BaseRepository
+
+L - LISKOV SUBSTITUTION:
+- CartRepository peut remplacer BaseRepository
+- Les méthodes respectent les contrats du parent
 """
 from typing import Optional
 from django.contrib.auth import get_user_model
@@ -11,6 +23,8 @@ from shop.models import Product
 User = get_user_model()
 
 
+# O - Open/Closed: Étend BaseRepository
+# L - Liskov: Substitutable à BaseRepository
 class CartRepository(BaseRepository[Cart]):
     """
     Repository for Cart model data access.

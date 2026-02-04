@@ -1,5 +1,17 @@
 """
 Order repository for data access operations.
+
+PRINCIPES SOLID: O + L (voir BaseRepository pour S)
+===================================================
+
+O - OPEN/CLOSED:
+- OrderRepository ÉTEND BaseRepository
+- Ajoute get_user_orders(), get_by_status(), etc.
+- Ne modifie PAS BaseRepository
+
+L - LISKOV SUBSTITUTION:
+- OrderRepository peut remplacer BaseRepository
+- Respecte les signatures de méthodes du parent
 """
 from typing import Optional, Dict, Any
 from django.db.models import QuerySet, Sum, Count, Q
@@ -12,6 +24,8 @@ from orders.models import Order, OrderItem
 User = get_user_model()
 
 
+# O - Open/Closed: Étend sans modifier
+# L - Liskov: Peut remplacer BaseRepository
 class OrderRepository(BaseRepository[Order]):
     """
     Repository for Order model data access.

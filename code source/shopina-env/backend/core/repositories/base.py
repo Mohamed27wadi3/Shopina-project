@@ -1,6 +1,48 @@
 """
 Base repository class for data access abstraction.
 Following the Repository Pattern.
+
+DESIGN PATTERNS UTILISÉS:
+=======================
+
+1. REPOSITORY PATTERN (Principal):
+   - Centralise l'accès aux données
+   - Masque les détails de la base de données
+   - Permet de changer de BDD sans toucher au code métier
+   - Utilisé: BaseRepository comme classe mère, ProductRepository, OrderRepository en enfants
+
+2. GENERIC/TEMPLATE PATTERN:
+   - Generic[ModelType] permet de réutiliser BaseRepository pour n'importe quel Model
+   - get_by_id(), get_all(), filter() fonctionnent pour tous les Models
+   - Évite la duplication de code
+
+3. ABSTRACT CLASS PATTERN:
+   - BaseRepository est une classe abstraite (de facto)
+   - Définit l'interface que tous les repositories doivent suivre
+   - Les enfants (ProductRepository) héritent et étendent
+
+4. DATA ACCESS OBJECT (DAO) PATTERN:
+   - Repository = Data Access Object
+   - Encapsule la logique d'accès aux données
+   - Simplifie l'interaction avec la BDD
+
+FLUX MVC COMPLET:
+HTTP Request
+    ↓
+  VIEW (gère la requête HTTP)
+    ↓
+SERVICE (logique métier, utilise Repository pour les données)
+    ↓
+REPOSITORY (accès aux données, c'est ICI) ← Vous êtes ici
+    ↓
+MODEL → DATABASE (stockage physique)
+
+AVANTAGES:
+✅ Séparation des responsabilités (S du SOLID)
+✅ Facile de changer la BDD (juste modifier le Repository)
+✅ Facile de tester (on peut mocker le Repository)
+✅ Code métier indépendant de la BDD
+✅ Pas de duplication (Generic[ModelType])
 """
 from typing import Generic, TypeVar, Optional, List, Dict, Any
 from django.db import models
@@ -10,6 +52,7 @@ from django.db.models import QuerySet
 ModelType = TypeVar('ModelType', bound=models.Model)
 
 
+# R - REPOSITORY: Classe de base pour tous les accès données
 class BaseRepository(Generic[ModelType]):
     """
     Base repository class that provides common data access patterns.
@@ -25,6 +68,8 @@ class BaseRepository(Generic[ModelType]):
         """
         self.model = model
     
+    # S - Responsabilité Unique: Cette méthode fait UNE CHOSE: récupérer par ID
+    # L - Liskov: Retourne Optional[ModelType] comme tous les enfants attendent
     def get_by_id(self, id: int) -> Optional[ModelType]:
         """
         Get a single instance by ID.
