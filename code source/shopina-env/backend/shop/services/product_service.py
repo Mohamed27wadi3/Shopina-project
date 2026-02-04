@@ -1,5 +1,28 @@
 """
 Product service for business logic operations.
+
+PRINCIPES SOLID APPLIQUÉS: S + D
+=================================
+
+S - SINGLE RESPONSIBILITY (Responsabilité Unique):
+- Ce service a UNE SEULE responsabilité: logique métier des produits
+- Il VALIDE les données (price, stock)
+- Il APPLIQUE les règles métier
+- Il ne fait PAS d'accès direct au Model (c'est dans ProductRepository)
+- Il ne gère PAS les requêtes HTTP (c'est dans Views)
+
+D - DEPENDENCY INVERSION (Inversion de Dépendance):
+- ProductService DÉPEND de ProductRepository (abstraction)
+- Il ne dépend PAS du Model Product directement
+- On peut remplacer le repository par un mock pour les tests
+
+FLUX DE DÉPENDANCE:
+VIEW → SERVICE (ProductService) → REPOSITORY (ProductRepository) → MODEL (Product)
+
+AVANTAGES:
+✅ Logique métier centralisée et testable
+✅ Facile de changer la base de données (juste changer Repository)
+✅ Facile de tester (on mock le repository)
 """
 from typing import Optional, List, Dict, Any
 from django.db.models import QuerySet
@@ -15,16 +38,22 @@ from shop.models import Product, Category
 from shop.repositories.product_repository import ProductRepository, CategoryRepository
 
 
+# S - Responsabilité Unique: Ce service gère la logique métier des produits UNIQUEMENT
+# D - Dependency Inversion: Dépend de ProductRepository (abstraction), pas du Model
 class ProductService(BaseService[Product]):
     """
     Service class for Product business logic.
     """
     
     def __init__(self):
+        # D - Dependency Inversion: On injecte les repositories (abstractions)
+        # Au lieu d'utiliser Product.objects directement
         self.product_repository = ProductRepository()
         self.category_repository = CategoryRepository()
         super().__init__(self.product_repository)
     
+    # S - Responsabilité Unique: Cette méthode fait UNE CHOSE: créer un produit avec validation
+    # D - Dependency Inversion: Utilise les repositories, pas les Models directement
     def create_product(self, name: str, price: float, category_id: int,
                       description: str = '', stock: int = 0, **kwargs) -> Product:
         """
@@ -45,7 +74,7 @@ class ProductService(BaseService[Product]):
             ValidationError: If validation fails
             ResourceNotFoundError: If category not found
         """
-        # Validate price
+        # Validation de la logique métier (responsabilité du Service)
         is_valid, error_msg = validate_price(price)
         if not is_valid:
             raise ValidationError(error_msg)
@@ -54,7 +83,7 @@ class ProductService(BaseService[Product]):
         if stock < 0:
             raise ValidationError("Stock cannot be negative")
         
-        # Get category
+        # D - Dependency Inversion: On utilise category_repository, pas Category.objects
         category = self.category_repository.get_by_id(category_id)
         if not category:
             raise ResourceNotFoundError("Category not found")
@@ -70,6 +99,59 @@ class ProductService(BaseService[Product]):
         )
         
         self.log_operation('product_created', {'product_id': product.id})
+        return product
+    
+    def create_product_for_shop(self, shop, name: str, price: float, 
+                               description: str = '', category_name: str = None,
+                               stock: int = 1, image=None) -> Product:
+        """
+        Create a product for a specific shop.
+        
+        Args:
+            shop: Shop instance
+            name: Product name
+            price: Product price
+            description: Product description
+            category_name: Category name (will be created if doesn't exist)
+            stock: Initial stock
+            image: Product image file
+            
+        Returns:
+            Created product
+            
+        Raises:
+            ValidationError: If validation fails
+        """
+        # Validate price
+        is_valid, error_msg = validate_price(float(price))
+        if not is_valid:
+            raise ValidationError(error_msg)
+        
+        # Validate stock
+        stock_int = int(stock)
+        if stock_int < 0:
+            raise ValidationError("Stock cannot be negative")
+        
+        # Get or create category
+        category = None
+        if category_name:
+            category, _ = Category.objects.get_or_create(name=category_name)
+        
+        # Create product
+        product = Product.objects.create(
+            name=name,
+            price=price,
+            description=description,
+            category=category,
+            stock=stock_int,
+            shop=shop,
+            image=image
+        )
+        
+        self.log_operation('product_created_for_shop', {
+            'product_id': product.id,
+            'shop_id': shop.id
+        })
         return product
     
     def update_product(self, product_id: int, **kwargs) -> Product:

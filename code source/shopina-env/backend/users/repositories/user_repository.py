@@ -1,5 +1,17 @@
 """
 User repository for data access operations.
+
+PRINCIPES SOLID: O + L (voir BaseRepository pour S)
+===================================================
+
+O - OPEN/CLOSED:
+- UserRepository HÉRITE de BaseRepository sans le modifier
+- On AJOUTE get_by_email(), get_by_username(), etc.
+- BaseRepository reste inchangé
+
+L - LISKOV SUBSTITUTION:
+- UserRepository peut REMPLACER BaseRepository partout
+- get_by_id() retourne Optional[User] comme le parent attend
 """
 from typing import Optional, List
 from django.contrib.auth import get_user_model
@@ -10,6 +22,8 @@ from core.repositories.base import BaseRepository
 User = get_user_model()
 
 
+# O - Open/Closed: Étend BaseRepository sans le modifier
+# L - Liskov: Peut remplacer BaseRepository
 class UserRepository(BaseRepository[User]):
     """
     Repository for User model data access.

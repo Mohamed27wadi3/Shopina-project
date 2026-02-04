@@ -238,12 +238,24 @@ def public_shop(request, slug):
     """
     Public, read-only shop view by slug.
     - Returns only active shops
+    - Includes theme customization data
     - No owner-identifying data leaked
     """
     try:
         shop = Shop.objects.get(slug=slug, is_active=True)
     except Shop.DoesNotExist:
         return Response({'detail': 'Shop not found or inactive.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Get theme if exists
+    theme = getattr(shop, 'theme', None)
+    theme_payload = None
+    if theme:
+        theme_payload = {
+            'template_id': theme.template_id,
+            'options': theme.options,
+            'is_active': theme.is_active,
+            'updated_at': theme.updated_at.isoformat(),
+        }
 
     return Response({
         'id': shop.id,
@@ -260,6 +272,7 @@ def public_shop(request, slug):
         'total_sales': float(shop.total_sales),
         'average_rating': shop.average_rating,
         'created_at': shop.created_at.isoformat(),
+        'theme': theme_payload,
     })
 
 
