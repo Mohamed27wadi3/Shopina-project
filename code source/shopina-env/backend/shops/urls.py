@@ -9,6 +9,7 @@ from .views import (
     save_theme,
     public_shop,
     public_shop_products,
+    public_shops_list,
 )
 
 app_name = 'shop'
@@ -24,6 +25,7 @@ urlpatterns = [
     path('api/my-shop/', get_my_shop, name='api-my-shop'),
     path('api/create/', create_shop_api, name='api-create'),
     path('api/theme/', save_theme, name='api-theme'),
+    path('api/public/', public_shops_list, name='api-public-list'),
     path('api/public/<slug:slug>/', public_shop, name='api-public'),
     path('api/public/<slug:slug>/products/', public_shop_products, name='api-public-products'),
 ]

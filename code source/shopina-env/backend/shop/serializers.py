@@ -25,6 +25,7 @@
 from rest_framework import serializers
 from .models import Category, Product
 from .models import Announcement
+from .models import StoreCustomization
 
 
 # V - VIEW SERIALIZER: Transforme Category Model en JSON
@@ -113,3 +114,86 @@ class AnnouncementSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(url)
             return url
         return None
+
+# V - VIEW SERIALIZER: Store Customization
+# ==========================================
+class StoreCustomizationSerializer(serializers.ModelSerializer):
+    """
+    Serializer pour StoreCustomization.
+    Transforme les paramètres de personnalisation en JSON.
+    """
+    # Champ personnalisé: transformer le logo en URL
+    logo = serializers.SerializerMethodField()
+    
+    # Champs calculés
+    colors = serializers.SerializerMethodField()
+    theme = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = StoreCustomization
+        fields = (
+            'id',
+            'shop',
+            # Colors
+            'primary_color',
+            'secondary_color',
+            'accent_color',
+            'background_color',
+            'text_color',
+            # Typography
+            'primary_font',
+            # Branding
+            'logo',
+            'shop_name_custom',
+            # Layout
+            'border_radius',
+            'shadow_style',
+            # Advanced
+            'advanced_options',
+            # Metadata
+            'created_at',
+            'updated_at',
+            # Champs calculés
+            'colors',
+            'theme',
+        )
+        read_only_fields = ('id', 'created_at', 'updated_at', 'colors', 'theme')
+    
+    def get_logo(self, obj):
+        """Transforme le logo en URL complète."""
+        request = self.context.get('request')
+        if obj.logo:
+            try:
+                url = obj.logo.url
+            except Exception:
+                url = obj.logo
+            if request and url and not str(url).startswith('http'):
+                return request.build_absolute_uri(url)
+            return url
+        return None
+    
+    def get_colors(self, obj):
+        """Retourne les couleurs en dictionnaire"""
+        return obj.get_colors_dict()
+    
+    def get_theme(self, obj):
+        """Retourne le thème complet"""
+        return obj.get_theme_dict()
+    
+    def validate_primary_color(self, value):
+        """Valide que la couleur est au format hex"""
+        if not value.startswith('#') or len(value) != 7:
+            raise serializers.ValidationError('Color must be in hex format: #RRGGBB')
+        return value
+    
+    def validate_secondary_color(self, value):
+        """Valide que la couleur est au format hex"""
+        if not value.startswith('#') or len(value) != 7:
+            raise serializers.ValidationError('Color must be in hex format: #RRGGBB')
+        return value
+    
+    def validate_accent_color(self, value):
+        """Valide que la couleur est au format hex"""
+        if not value.startswith('#') or len(value) != 7:
+            raise serializers.ValidationError('Color must be in hex format: #RRGGBB')
+        return value

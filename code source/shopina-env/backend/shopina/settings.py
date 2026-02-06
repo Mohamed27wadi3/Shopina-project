@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'reviews',
     'notifications',
     'templates',
+    'chatbot',
 ]
 
 SITE_ID = 1
@@ -79,6 +80,10 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',  # allauth
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # ✅ Custom session middleware for secure session management
+    'core.middleware.session_middleware.SessionPersistenceMiddleware',
+    'core.middleware.session_middleware.RoleBasedSessionMiddleware',
+    'core.middleware.session_middleware.CSRFProtectionMiddleware',
 ]
 
 ROOT_URLCONF = 'shopina.urls'
@@ -229,7 +234,14 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-# CSRF settings for development (adjust for production)
+# Chatbot settings
+CHATBOT_DIR = os.environ.get('CHATBOT_DIR', str(BASE_DIR.parent / 'chat boot'))
+CHATBOT_GEMINI_API_KEY = os.environ.get('CHATBOT_GEMINI_API_KEY')
+CHATBOT_GEMINI_MODEL = os.environ.get('CHATBOT_GEMINI_MODEL', 'gemini-2.0-flash')
+CHATBOT_RATE_LIMIT_PER_MINUTE = int(os.environ.get('CHATBOT_RATE_LIMIT_PER_MINUTE', '20'))
+CHATBOT_MAX_MESSAGE_LENGTH = int(os.environ.get('CHATBOT_MAX_MESSAGE_LENGTH', '1000'))
+
+# ✅ ENHANCED CSRF settings for secure token management
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:3001',
@@ -239,17 +251,40 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3005',
     'http://localhost:5173',
 ]
-CSRF_COOKIE_HTTPONLY = False  # Allow reading token in JS when needed
-CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False  # Allow reading token in JS for AJAX requests
+CSRF_COOKIE_SAMESITE = 'Lax'  # Prevent CSRF attacks while allowing form submissions
 CSRF_COOKIE_SECURE = False  # Set True in production over HTTPS
+CSRF_COOKIE_AGE = 31449600  # 1 year - long lived CSRF protection
+CSRF_USE_SESSIONS = True  # ✅ Store CSRF token in session for extra security
+CSRF_COOKIE_NAME = 'shopina_csrf'  # Custom CSRF cookie name
 
-# Session configuration (used for Django views and admin)
+# ✅ ENHANCED Session configuration (used for Django views and admin)
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_AGE = 14 * 24 * 60 * 60  # 14 days
-SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_AGE = 14 * 24 * 60 * 60  # 14 days - Base duration
+SESSION_SAVE_EVERY_REQUEST = True  # ✅ Save session on every request to prevent timeout
+SESSION_COOKIE_HTTPONLY = True  # ✅ Prevent JS access to prevent XSS attacks
+SESSION_COOKIE_SAMESITE = 'Lax'  # ✅ CSRF protection - allow same-site requests
 SESSION_COOKIE_SECURE = False  # Set True in production over HTTPS
+SESSION_COOKIE_DOMAIN = None  # Allow all domains
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # ✅ Keep session after browser close
+SESSION_COOKIE_NAME = 'shopina_session'  # Custom session cookie name
+
+# ✅ ROLE-BASED SESSION DURATIONS
+SESSION_CUSTOMER_MAX_AGE = 14 * 24 * 60 * 60  # 14 days for customers
+SESSION_SELLER_MAX_AGE = 7 * 24 * 60 * 60  # 7 days for sellers (stricter)
+SESSION_ADMIN_MAX_AGE = 1 * 24 * 60 * 60  # 1 day for admin (strictest)
+SESSION_REMEMBER_ME_AGE = 30 * 24 * 60 * 60  # 30 days if "Remember me" selected
+
+# ✅ CACHE CONFIGURATION FOR SESSION METADATA
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'shopina-cache',
+        'OPTIONS': {
+            'MAX_ENTRIES': 10000
+        }
+    }
+}
 
 # Stripe settings (use env vars in production)
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')

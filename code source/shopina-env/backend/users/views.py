@@ -4,7 +4,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
-from django.db.models import Count, DecimalField, Q, Sum, Value
+from django.db.models import Count, DecimalField, Q, Sum, Value, F, ExpressionWrapper
+from django.utils import timezone
 from django.db.models.functions import Coalesce
 from core.permissions.custom_permissions import IsAdmin, IsOwnerOrAdmin, IsSeller
 from core.utils.exceptions import ValidationError as CustomValidationError
@@ -296,7 +297,12 @@ class CustomerListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated, IsSeller]
 
     def get_queryset(self):
-        queryset = User.objects.filter(role='CUSTOMER')
+        try:
+            shop = self.request.user.shop
+        except Exception:
+            return User.objects.none()
+
+        queryset = User.objects.filter(role='CUSTOMER', orders__items__product__shop=shop).distinct()
         search = (self.request.query_params.get('search') or '').strip()
         if search:
             queryset = queryset.filter(
@@ -308,14 +314,116 @@ class CustomerListView(generics.ListAPIView):
         return (
             queryset
             .annotate(
-                total_orders=Count('orders', distinct=True),
+                total_orders=Count('orders', distinct=True, filter=Q(orders__items__product__shop=shop)),
                 total_spent=Coalesce(
-                    Sum('orders__total'),
+                    Sum(
+                        ExpressionWrapper(
+                            F('orders__items__price') * F('orders__items__quantity'),
+                            output_field=DecimalField(max_digits=12, decimal_places=2)
+                        ),
+                        filter=Q(orders__items__product__shop=shop),
+                    ),
                     Value(0, output_field=DecimalField(max_digits=12, decimal_places=2))
                 ),
             )
             .order_by('-date_joined')
         )
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        try:
+            shop = request.user.shop
+        except Exception:
+            return Response({'results': [], 'stats': {'total_customers': 0, 'active_today': 0}}, status=status.HTTP_200_OK)
+
+        today = timezone.localdate()
+        active_today = (
+            User.objects.filter(
+                role='CUSTOMER',
+                orders__items__product__shop=shop,
+                orders__created_at__date=today,
+            )
+            .distinct()
+            .count()
+        )
+
+        return Response({
+            'results': serializer.data,
+            'stats': {
+                'total_customers': queryset.count(),
+                'active_today': active_today,
+            },
+        })
+
+
+class CustomerDetailView(APIView):
+    """Return detailed customer info scoped to the seller's shop."""
+
+    permission_classes = [permissions.IsAuthenticated, IsSeller]
+
+    def get(self, request, pk):
+        try:
+            shop = request.user.shop
+        except Exception:
+            return Response({'detail': 'Vous devez créer une boutique.'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            customer = User.objects.get(pk=pk, role='CUSTOMER')
+        except User.DoesNotExist:
+            return Response({'detail': 'Client introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        has_orders = customer.orders.filter(items__product__shop=shop).exists()
+        if not has_orders:
+            return Response({'detail': 'Accès refusé.'}, status=status.HTTP_403_FORBIDDEN)
+
+        total_orders = customer.orders.filter(items__product__shop=shop).distinct().count()
+        total_spent = customer.orders.filter(items__product__shop=shop).aggregate(
+            total=Coalesce(
+                Sum(
+                    ExpressionWrapper(
+                        F('items__price') * F('items__quantity'),
+                        output_field=DecimalField(max_digits=12, decimal_places=2)
+                    ),
+                    filter=Q(items__product__shop=shop),
+                ),
+                Value(0, output_field=DecimalField(max_digits=12, decimal_places=2))
+            )
+        )['total']
+
+        recent_orders = (
+            customer.orders.filter(items__product__shop=shop)
+            .annotate(
+                seller_total=Coalesce(
+                    Sum(
+                        ExpressionWrapper(
+                            F('items__price') * F('items__quantity'),
+                            output_field=DecimalField(max_digits=10, decimal_places=2)
+                        ),
+                        filter=Q(items__product__shop=shop),
+                    ),
+                    Value(0, output_field=DecimalField(max_digits=10, decimal_places=2))
+                )
+            )
+            .order_by('-created_at')
+            .values('id', 'status', 'created_at', 'seller_total')[:10]
+        )
+
+        payload = {
+            'id': customer.id,
+            'username': customer.username,
+            'email': customer.email,
+            'first_name': customer.first_name,
+            'last_name': customer.last_name,
+            'phone_number': customer.phone_number,
+            'avatar': customer.avatar.url if customer.avatar else None,
+            'city': customer.city,
+            'date_joined': customer.date_joined,
+            'total_orders': total_orders,
+            'total_spent': float(total_spent or 0),
+            'recent_orders': list(recent_orders),
+        }
+        return Response(payload, status=status.HTTP_200_OK)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

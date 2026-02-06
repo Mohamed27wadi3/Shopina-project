@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.db.models import Count
 from .models import ShopTheme
 from shop.serializers import ProductSerializer
 
@@ -274,6 +275,47 @@ def public_shop(request, slug):
         'created_at': shop.created_at.isoformat(),
         'theme': theme_payload,
     })
+
+
+@api_view(['GET'])
+def public_shops_list(request):
+    """
+    Public list of active shops that have at least one product.
+    - Only active shops are included
+    - Excludes empty shops (no products)
+    - No owner-identifying data is returned
+    """
+    shops = (
+        Shop.objects
+        .filter(is_active=True, status='active')
+        .annotate(product_count=Count('products', distinct=True))
+        .filter(product_count__gt=0)
+        .order_by('-created_at')
+    )
+
+    def _file_url(file_field):
+        if not file_field:
+            return None
+        try:
+            return request.build_absolute_uri(file_field.url)
+        except Exception:
+            return file_field.url
+
+    payload = []
+    for shop in shops:
+        payload.append({
+            'id': shop.id,
+            'name': shop.name,
+            'slug': shop.slug,
+            'description': shop.description,
+            'logo': _file_url(shop.logo),
+            'banner': _file_url(shop.banner),
+            'average_rating': shop.average_rating,
+            'total_products': shop.product_count,
+            'created_at': shop.created_at.isoformat(),
+        })
+
+    return Response(payload)
 
 
 @api_view(['GET'])

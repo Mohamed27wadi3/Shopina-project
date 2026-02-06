@@ -38,6 +38,8 @@ from .models import Category, Product
 from .serializers import CategorySerializer, ProductSerializer
 from .models import Announcement
 from .serializers import AnnouncementSerializer
+from .models import StoreCustomization
+from .serializers import StoreCustomizationSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import parser_classes
@@ -308,3 +310,118 @@ def public_shop_announcements(request, slug):
     announcements = Announcement.objects.filter(shop=shop)
     serializer = AnnouncementSerializer(announcements, many=True, context={'request': request})
     return Response(serializer.data)
+
+# ============================================================================
+# STORE CUSTOMIZATION - Theme & Branding
+# ============================================================================
+
+@api_view(['GET', 'POST', 'PUT'])
+@permission_classes([IsAuthenticated])
+@parser_classes((MultiPartParser, FormParser))
+def store_customization_api(request):
+    """
+    Get, Create or Update store customization for authenticated user's shop.
+    
+    GET  → Récupère les paramètres de personnalisation
+    POST → Crée les paramètres (si n'existent pas)
+    PUT  → Met à jour les paramètres
+    """
+    try:
+        shop = request.user.shop
+    except AttributeError:
+        return Response({'detail': 'You must have a shop to customize.'}, status=400)
+    
+    if request.method == 'GET':
+        # Récupère ou crée avec défaut
+        customization, created = StoreCustomization.objects.get_or_create(shop=shop)
+        serializer = StoreCustomizationSerializer(customization, context={'request': request})
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        # Crée une nouvelle customization
+        if StoreCustomization.objects.filter(shop=shop).exists():
+            return Response({'detail': 'Customization already exists. Use PUT to update.'}, status=400)
+        
+        serializer = StoreCustomizationSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+        if serializer.is_valid():
+            serializer.save(shop=shop)
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+    
+    elif request.method == 'PUT':
+        # Met à jour la customization existante
+        try:
+            customization = StoreCustomization.objects.get(shop=shop)
+        except StoreCustomization.DoesNotExist:
+            return Response({'detail': 'Customization not found. Create one first with POST.'}, status=404)
+        
+        serializer = StoreCustomizationSerializer(
+            customization,
+            data=request.data,
+            partial=True,  # Allow partial updates
+            context={'request': request}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+
+@api_view(['GET'])
+def public_shop_customization(request, slug):
+    """
+    Get public shop customization (theme, colors, fonts, logo).
+    Accessible without authentication.
+    """
+    try:
+        from shops.models import Shop as ShopModel
+        shop = ShopModel.objects.get(slug=slug, is_active=True)
+    except Exception:
+        return Response({'detail': 'Shop not found.'}, status=404)
+    
+    try:
+        customization = StoreCustomization.objects.get(shop=shop)
+        serializer = StoreCustomizationSerializer(customization, context={'request': request})
+        return Response(serializer.data)
+    except StoreCustomization.DoesNotExist:
+        # Return default customization if none exists
+        return Response({
+            'primary_color': '#0077FF',
+            'secondary_color': '#5AC8FA',
+            'accent_color': '#FFD43B',
+            'background_color': '#FFFFFF',
+            'text_color': '#0A1A2F',
+            'primary_font': 'inter',
+            'logo': None,
+            'shop_name_custom': shop.name,
+            'border_radius': 'rounded-xl',
+            'shadow_style': 'shadow-lg',
+            'advanced_options': {},
+            'colors': {
+                'primary': '#0077FF',
+                'secondary': '#5AC8FA',
+                'accent': '#FFD43B',
+                'background': '#FFFFFF',
+                'text': '#0A1A2F',
+            },
+            'theme': {
+                'colors': {
+                    'primary': '#0077FF',
+                    'secondary': '#5AC8FA',
+                    'accent': '#FFD43B',
+                    'background': '#FFFFFF',
+                    'text': '#0A1A2F',
+                },
+                'font': 'inter',
+                'logo': None,
+                'shopName': shop.name,
+                'layout': {
+                    'borderRadius': 'rounded-xl',
+                    'shadow': 'shadow-lg',
+                },
+                'advanced': {},
+            }
+        })

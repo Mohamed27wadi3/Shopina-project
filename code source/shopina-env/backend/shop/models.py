@@ -102,3 +102,156 @@ class Announcement(models.Model):
 
     def __str__(self):
         return f"Announcement: {self.title}"
+
+
+# M - MODEL: Store Customization (Theme & Branding)
+# ===================================================
+class StoreCustomization(models.Model):
+    """
+    Stocke les paramètres de personnalisation d'une boutique:
+    - Couleurs (primaire, secondaire, accent)
+    - Police d'écriture
+    - Logo
+    - Nom de la boutique
+    - Arrondi des boutons, ombres, etc.
+    
+    Chaque boutique a SON PROPRE enregistrement (one-to-one)
+    """
+    shop = models.OneToOneField('shops.Shop', on_delete=models.CASCADE, related_name='customization')
+    
+    # ========== COLORS ==========
+    # Couleurs principales
+    primary_color = models.CharField(
+        max_length=7, 
+        default='#0077FF',
+        help_text="Couleur primaire (hex format: #RRGGBB)"
+    )
+    secondary_color = models.CharField(
+        max_length=7, 
+        default='#5AC8FA',
+        help_text="Couleur secondaire"
+    )
+    accent_color = models.CharField(
+        max_length=7, 
+        default='#FFD43B',
+        help_text="Couleur d'accent"
+    )
+    background_color = models.CharField(
+        max_length=7, 
+        default='#FFFFFF',
+        help_text="Couleur de fond"
+    )
+    text_color = models.CharField(
+        max_length=7, 
+        default='#0A1A2F',
+        help_text="Couleur du texte"
+    )
+    
+    # ========== TYPOGRAPHY ==========
+    # Police d'écriture disponible
+    FONT_CHOICES = [
+        ('inter', 'Inter (Default)'),
+        ('poppins', 'Poppins'),
+        ('roboto', 'Roboto'),
+        ('ubuntu', 'Ubuntu'),
+        ('dm-sans', 'DM Sans'),
+        ('geist', 'Geist'),
+    ]
+    primary_font = models.CharField(
+        max_length=20,
+        choices=FONT_CHOICES,
+        default='inter',
+        help_text="Police principale"
+    )
+    
+    # ========== BRANDING ==========
+    # Logo de la boutique
+    logo = models.ImageField(
+        upload_to='shop_logos/',
+        null=True,
+        blank=True,
+        help_text="Logo de la boutique (recommandé: 300x300px)"
+    )
+    
+    # Nom de la boutique (peut être différent du shop.name)
+    shop_name_custom = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Nom personnalisé (si vide, utilise shop.name)"
+    )
+    
+    # ========== LAYOUT SETTINGS ==========
+    # Arrondi des éléments
+    BORDER_RADIUS_CHOICES = [
+        ('rounded-none', 'Sharp (0px)'),
+        ('rounded-sm', 'Very Small (4px)'),
+        ('rounded-md', 'Small (8px)'),
+        ('rounded-lg', 'Medium (12px)'),
+        ('rounded-xl', 'Large (16px)'),
+        ('rounded-2xl', 'Very Large (24px)'),
+    ]
+    border_radius = models.CharField(
+        max_length=20,
+        choices=BORDER_RADIUS_CHOICES,
+        default='rounded-xl',
+        help_text="Arrondi des boutons et cartes"
+    )
+    
+    # Ombres
+    SHADOW_CHOICES = [
+        ('shadow-sm', 'Small'),
+        ('shadow-md', 'Medium'),
+        ('shadow-lg', 'Large'),
+        ('shadow-xl', 'Extra Large'),
+    ]
+    shadow_style = models.CharField(
+        max_length=20,
+        choices=SHADOW_CHOICES,
+        default='shadow-lg',
+        help_text="Style d'ombre"
+    )
+    
+    # ========== ADVANCED OPTIONS ==========
+    # Options supplémentaires en JSON
+    # Exemple: {"headerHeight": 80, "footerBgColor": "#f5f5f5", "enableAnimations": true}
+    advanced_options = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Options avancées en JSON"
+    )
+    
+    # ========== METADATA ==========
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Store Customization"
+        verbose_name_plural = "Store Customizations"
+    
+    def __str__(self):
+        return f"Customization for {self.shop.name}"
+    
+    def get_colors_dict(self):
+        """Retourne toutes les couleurs en dictionnaire"""
+        return {
+            'primary': self.primary_color,
+            'secondary': self.secondary_color,
+            'accent': self.accent_color,
+            'background': self.background_color,
+            'text': self.text_color,
+        }
+    
+    def get_theme_dict(self):
+        """Retourne le thème complet en dictionnaire"""
+        return {
+            'colors': self.get_colors_dict(),
+            'font': self.primary_font,
+            'logo': self.logo.url if self.logo else None,
+            'shopName': self.shop_name_custom or self.shop.name,
+            'layout': {
+                'borderRadius': self.border_radius,
+                'shadow': self.shadow_style,
+            },
+            'advanced': self.advanced_options,
+        }

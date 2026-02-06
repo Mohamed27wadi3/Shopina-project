@@ -31,6 +31,8 @@ from .views import (
     delete_product_api,
     announcements_list,
     public_shop_announcements,
+    store_customization_api,
+    public_shop_customization,
 )
 
 # ROUTER PATTERN: Crée automatiquement les routes CRUD
@@ -50,4 +52,7 @@ urlpatterns = [
     path('<int:product_id>/delete/', delete_product_api, name='api-delete-product'),
     path('announcements/', announcements_list, name='api-announcements'),
     path('public/<slug:slug>/announcements/', public_shop_announcements, name='api-public-announcements'),
+    # Customization routes
+    path('customization/', store_customization_api, name='api-customization'),
+    path('public/<slug:slug>/customization/', public_shop_customization, name='api-public-customization'),
 ]

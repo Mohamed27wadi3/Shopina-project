@@ -1,0 +1,34 @@
+[
+  {
+    "title": "À propos de Shopina",
+    "content": "Shopina est une plateforme e-commerce moderne et intuitive qui permet aux vendeurs de créer et gérer leurs boutiques en ligne facilement. Notre plateforme supporte les paiements Stripe, la gestion des produits, et des templates de design personnalisables."
+  },
+  {
+    "title": "Comment créer une boutique",
+    "content": "Pour créer une boutique sur Shopina, suivez ces étapes: 1) Inscrivez-vous avec votre email, 2) Créez votre profil vendeur, 3) Configurez votre boutique avec le nom et le logo, 4) Choisissez un template de design, 5) Ajoutez vos produits. C'est gratuit et simple!"
+  },
+  {
+    "title": "Gestion des produits",
+    "content": "Vous pouvez ajouter des produits à votre boutique en remplissant le formulaire d'ajout: nom du produit, description, prix, images, catégorie et stock. Les produits peuvent être modifiés ou supprimés à tout moment depuis votre tableau de bord."
+  },
+  {
+    "title": "Options de paiement",
+    "content": "Shopina accepte les paiements par carte bancaire via Stripe. Les clients peuvent payer de manière sécurisée lors du checkout. Les vendeurs reçoivent les paiements directement sur leur compte Stripe connecté."
+  },
+  {
+    "title": "Tarification Shopina",
+    "content": "Shopina propose 4 plans: Plan Gratuit (boutique basique), Plan Starter (10 produits), Plan Pro (produits illimités + analytics), Plan Enterprise (support dédié). Choisissez le plan qui correspond à vos besoins."
+  },
+  {
+    "title": "Support client",
+    "content": "Pour toute question ou problème, contactez notre équipe support via l'email support@shopina.com ou visitez notre page d'aide. Nous répondons généralement dans les 24 heures."
+  },
+  {
+    "title": "Sécurité des données",
+    "content": "Shopina utilise le chiffrement SSL, l'authentification JWT, et suit les standards de sécurité PCI-DSS. Vos données personnelles et celles de vos clients sont protégées."
+  },
+  {
+    "title": "Mobile responsif",
+    "content": "Toutes les boutiques Shopina sont automatiquement optimisées pour mobile. Vos clients peuvent faire leurs achats sur n'importe quel appareil (téléphone, tablette, ordinateur)."
+  }
+]

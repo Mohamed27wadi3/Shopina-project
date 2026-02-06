@@ -7,7 +7,7 @@ import traceback
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
 from django.contrib.auth import get_user_model
-from django.db.models import Count, DecimalField, ExpressionWrapper, F, Sum, Value
+from django.db.models import Count, DecimalField, ExpressionWrapper, F, Sum, Value, Q
 from django.db.models.functions import Coalesce, TruncDate
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
@@ -434,14 +434,24 @@ class DashboardStatsView(APIView):
             return 100.0 if current > 0 else 0.0
         return round(((current - previous) / previous) * 100, 2)
 
-    def _build_revenue_series(self, queryset, today):
+    def _build_revenue_series(self, items_queryset, today):
         window_start = today - timedelta(days=6)
         aggregated = (
-            queryset
-            .filter(created_at__date__gte=window_start)
-            .annotate(day=TruncDate('created_at'))
+            items_queryset
+            .filter(order__created_at__date__gte=window_start)
+            .annotate(day=TruncDate('order__created_at'))
             .values('day')
-            .annotate(total=Coalesce(Sum('total'), Value(0, output_field=DecimalField(max_digits=10, decimal_places=2))))
+            .annotate(
+                total=Coalesce(
+                    Sum(
+                        ExpressionWrapper(
+                            F('price') * F('quantity'),
+                            output_field=DecimalField(max_digits=10, decimal_places=2),
+                        )
+                    ),
+                    Value(0, output_field=DecimalField(max_digits=10, decimal_places=2))
+                )
+            )
         )
         mapping = {item['day']: item['total'] for item in aggregated}
         series = []
@@ -454,13 +464,13 @@ class DashboardStatsView(APIView):
         total_value = float(sum(mapping.values())) if mapping else 0.0
         return series, total_value
 
-    def _build_order_series(self, today):
+    def _build_order_series(self, shop, today):
         window_start = today - timedelta(days=6)
         aggregated = (
-            Order.objects.filter(created_at__date__gte=window_start)
+            Order.objects.filter(created_at__date__gte=window_start, items__product__shop=shop)
             .annotate(day=TruncDate('created_at'))
             .values('day')
-            .annotate(count=Count('id'))
+            .annotate(count=Count('id', distinct=True))
         )
         mapping = {item['day']: item['count'] for item in aggregated}
         series = []
@@ -475,42 +485,84 @@ class DashboardStatsView(APIView):
 
     def get(self, request):
         try:
+            try:
+                shop = request.user.shop
+            except Exception:
+                return Response({
+                    'totals': {
+                        'revenue': 0,
+                        'revenue_today': 0,
+                        'orders': 0,
+                        'orders_today': 0,
+                        'paid_orders': 0,
+                        'customers': 0,
+                        'products': 0,
+                        'avg_order_value': 0,
+                    },
+                    'changes': {
+                        'revenue_pct': 0,
+                        'orders_pct': 0,
+                        'window_revenue': 0,
+                        'window_orders': 0,
+                    },
+                    'series': {
+                        'revenue': [],
+                        'orders': [],
+                    },
+                    'top_products': [],
+                    'recent_orders': [],
+                }, status=200)
+
             today = timezone.localdate()
             period_start = today - timedelta(days=6)
             previous_start = period_start - timedelta(days=7)
             previous_end = period_start - timedelta(days=1)
             completed_statuses = ['processing', 'completed']
 
-            # Scope all aggregations to the authenticated user's data to avoid cross-account leakage
-            revenue_qs = Order.objects.filter(user=request.user, status__in=completed_statuses)
-            total_revenue = revenue_qs.aggregate(
-                total=Coalesce(Sum('total'), Value(0, output_field=DecimalField(max_digits=10, decimal_places=2)))
+            # Scope all aggregations to the authenticated seller's shop
+            items_qs = OrderItem.objects.filter(product__shop=shop)
+            paid_items_qs = items_qs.filter(order__status__in=completed_statuses)
+
+            total_revenue = paid_items_qs.aggregate(
+                total=Coalesce(
+                    Sum(ExpressionWrapper(F('price') * F('quantity'), output_field=DecimalField(max_digits=10, decimal_places=2))),
+                    Value(0, output_field=DecimalField(max_digits=10, decimal_places=2))
+                )
             )['total']
-            revenue_today = revenue_qs.filter(created_at__date=today).aggregate(
-                total=Coalesce(Sum('total'), Value(0, output_field=DecimalField(max_digits=10, decimal_places=2)))
+            revenue_today = paid_items_qs.filter(order__created_at__date=today).aggregate(
+                total=Coalesce(
+                    Sum(ExpressionWrapper(F('price') * F('quantity'), output_field=DecimalField(max_digits=10, decimal_places=2))),
+                    Value(0, output_field=DecimalField(max_digits=10, decimal_places=2))
+                )
             )['total']
 
-            orders_today = Order.objects.filter(user=request.user, created_at__date=today).count()
-            total_orders = Order.objects.filter(user=request.user).count()
-            paid_orders = revenue_qs.count()
+            total_orders = Order.objects.filter(items__product__shop=shop).distinct().count()
+            orders_today = Order.objects.filter(items__product__shop=shop, created_at__date=today).distinct().count()
+            paid_orders = Order.objects.filter(items__product__shop=shop, status__in=completed_statuses).distinct().count()
 
-            current_revenue_total = revenue_qs.filter(created_at__date__gte=period_start).aggregate(
-                total=Coalesce(Sum('total'), Value(0, output_field=DecimalField(max_digits=10, decimal_places=2)))
+            current_revenue_total = paid_items_qs.filter(order__created_at__date__gte=period_start).aggregate(
+                total=Coalesce(
+                    Sum(ExpressionWrapper(F('price') * F('quantity'), output_field=DecimalField(max_digits=10, decimal_places=2))),
+                    Value(0, output_field=DecimalField(max_digits=10, decimal_places=2))
+                )
             )['total']
-            previous_revenue_total = revenue_qs.filter(created_at__date__gte=previous_start, created_at__date__lte=previous_end).aggregate(
-                total=Coalesce(Sum('total'), Value(0, output_field=DecimalField(max_digits=10, decimal_places=2)))
+            previous_revenue_total = paid_items_qs.filter(order__created_at__date__gte=previous_start, order__created_at__date__lte=previous_end).aggregate(
+                total=Coalesce(
+                    Sum(ExpressionWrapper(F('price') * F('quantity'), output_field=DecimalField(max_digits=10, decimal_places=2))),
+                    Value(0, output_field=DecimalField(max_digits=10, decimal_places=2))
+                )
             )['total']
 
-            current_orders = Order.objects.filter(user=request.user, created_at__date__gte=period_start).count()
-            previous_orders = Order.objects.filter(user=request.user, created_at__date__gte=previous_start, created_at__date__lte=previous_end).count()
+            current_orders = Order.objects.filter(items__product__shop=shop, created_at__date__gte=period_start).distinct().count()
+            previous_orders = Order.objects.filter(items__product__shop=shop, created_at__date__gte=previous_start, created_at__date__lte=previous_end).distinct().count()
 
             avg_order_value = float(current_revenue_total) / current_orders if current_orders else 0.0
 
-            revenue_series, revenue_window_sum = self._build_revenue_series(revenue_qs, today)
-            orders_series, orders_window_sum = self._build_order_series(today)
+            revenue_series, revenue_window_sum = self._build_revenue_series(paid_items_qs, today)
+            orders_series, orders_window_sum = self._build_order_series(shop, today)
 
             top_products = list(
-                OrderItem.objects.filter(order__user=request.user, order__status__in=completed_statuses, product__isnull=False)
+                OrderItem.objects.filter(product__shop=shop, order__status__in=completed_statuses, product__isnull=False)
                 .values('product__id', 'product__name')
                 .annotate(
                     quantity=Coalesce(Sum('quantity'), Value(0)),
@@ -532,13 +584,35 @@ class DashboardStatsView(APIView):
                     'id': order.id,
                     'customer': order.user.get_full_name() or order.user.username,
                     'status': order.status,
-                    'total': float(order.total),
+                    'total': float(order.seller_total),
                     'created_at': order.created_at.isoformat(),
                 }
-                for order in Order.objects.select_related('user').filter(user=request.user).order_by('-created_at')[:6]
+                for order in (
+                    Order.objects.select_related('user')
+                    .filter(items__product__shop=shop)
+                    .annotate(
+                        seller_total=Coalesce(
+                            Sum(
+                                ExpressionWrapper(
+                                    F('items__price') * F('items__quantity'),
+                                    output_field=DecimalField(max_digits=10, decimal_places=2),
+                                ),
+                                filter=Q(items__product__shop=shop),
+                            ),
+                            Value(0, output_field=DecimalField(max_digits=10, decimal_places=2)),
+                        )
+                    )
+                    .order_by('-created_at')
+                    .distinct()[:6]
+                )
             ]
 
             User = get_user_model()
+            customer_count = (
+                User.objects.filter(orders__items__product__shop=shop)
+                .distinct()
+                .count()
+            )
             response_data = {
                 'totals': {
                     'revenue': float(total_revenue),
@@ -546,8 +620,8 @@ class DashboardStatsView(APIView):
                     'orders': total_orders,
                     'orders_today': orders_today,
                     'paid_orders': paid_orders,
-                    'customers': User.objects.count(),
-                    'products': Product.objects.count(),
+                    'customers': customer_count,
+                    'products': Product.objects.filter(shop=shop).count(),
                     'avg_order_value': round(avg_order_value, 2),
                 },
                 'changes': {
