@@ -138,13 +138,37 @@ def create_product_api(request):
 @api_view(['GET'])
 def public_shop_products(request, slug):
     """Return public products for a shop identified by slug (only active shop)."""
+    from shops.models import Shop as ShopModel
+    
     try:
-        from shops.models import Shop as ShopModel
-        shop = ShopModel.objects.get(slug=slug, is_active=True)
-    except Exception:
-        return Response({'detail': 'Shop not found.'}, status=404)
+        shop = ShopModel.objects.get(slug=slug)
+    except ShopModel.DoesNotExist:
+        return Response({'detail': f'Shop with slug "{slug}" not found.'}, status=404)
+    
+    if not shop.is_active:
+        return Response({
+            'detail': 'This shop is not publicly available yet.',
+            'is_active': False
+        }, status=403)
 
     products = Product.objects.filter(shop=shop)
+    serializer = ProductSerializer(products, many=True, context={'request': request})
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def merchant_shop_products(request):
+    """
+    Endpoint pour le marchand: retourne les produits de sa propre boutique
+    (même si elle n'est pas active publiquement).
+    """
+    try:
+        user_shop = request.user.shop
+    except AttributeError:
+        return Response({'detail': 'Vous n\'avez pas de boutique.'}, status=404)
+
+    products = Product.objects.filter(shop=user_shop)
     serializer = ProductSerializer(products, many=True, context={'request': request})
     return Response(serializer.data)
 

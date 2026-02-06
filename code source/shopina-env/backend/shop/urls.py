@@ -26,6 +26,7 @@ from .views import (
     ProductViewSet,
     create_product_api,
     public_shop_products,
+    merchant_shop_products,
     update_product_api,
     delete_product_api,
     announcements_list,
@@ -43,6 +44,7 @@ urlpatterns = [
     path('', include(router.urls)),
     # Routes personnalisées
     path('create/', create_product_api, name='api-create-product'),
+    path('my-products/', merchant_shop_products, name='api-merchant-products'),
     path('public/<slug:slug>/products/', public_shop_products, name='api-public-products'),
     path('<int:product_id>/update/', update_product_api, name='api-update-product'),
     path('<int:product_id>/delete/', delete_product_api, name='api-delete-product'),
